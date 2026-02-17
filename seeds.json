@@ -1,0 +1,205 @@
+[
+  {
+    "id": 1,
+
+    "general": {
+      "name": "Rondo",
+      "plant_name": "Petit pois nain",
+      "latin_name": "Pisum sativum",
+      "type": "Légume",
+      "life_cycle": "Annuel",
+      "difficulty_level": "Facile",
+      "height_cm": { "min": 40, "max": 60 },
+      "in_stock": true,
+
+      "sowing_month_indoor": [2, 3],
+      "sowing_month_outdoor": [3, 4, 5],
+      "harvest_months": [6, 7],
+
+      "days_before_harvest_min": 70,
+      "days_before_harvest_max": 90,
+
+      "description": "Variété précoce idéale pour débutants. Produit des gousses sucrées et bien remplies. Adaptée à la pleine terre et à la culture en pot."
+    },
+
+    "germination": {
+      "ideal_temp_c": { "min": 10, "max": 20 },
+      "duration_days": { "min": 7, "max": 14 },
+      "depth_cm": { "min": 3, "max": 4 },
+      "spacing_between_seeds_cm": { "min": 5, "max": 8 },
+      "seeds_per_cell": 2,
+
+      "light_need": "Les graines n’ont pas besoin de lumière pour germer. Elles doivent être recouvertes de terre. Après la levée, placer immédiatement dans un endroit très lumineux.",
+
+      "step_by_step": "Semer dans un sol léger. Déposer 1 à 2 graines par alvéole. Recouvrir de 3 à 4 cm de terre. Arroser doucement. Maintenir humide jusqu'à la levée."
+    },
+
+    "transplant": {
+      "possible": true,
+      "possible_conditions": "Possible uniquement si le semis a été réalisé en intérieur. Repiquer lorsque les plants possèdent 2 à 3 vraies feuilles (2 à 3 semaines après la levée).",
+
+      "spacing_between_plants_cm": { "min": 5, "max": 8 },
+      "row_spacing_cm": { "min": 40, "max": 50 },
+
+      "pot_possible": true,
+      "pot_description": "Pot minimum 30 cm diamètre et 25 cm profondeur avec drainage. Substrat riche mais drainant.",
+
+      "light_after_transplant": "Après repiquage, placer en lumière vive mais éviter le plein soleil direct pendant 3 à 4 jours. Ensuite, exposition progressive au soleil doux.",
+
+      "transplant_description": "Arroser la veille. Extraire délicatement la motte sans casser les racines. Installer dans un sol ameubli. Arroser immédiatement après plantation."
+    },
+
+    "growing": {
+      "exposure_type": ["Soleil doux", "Mi-ombre"],
+      "heat_sensitive_above_c": 25,
+
+      "exposure_description": "Le petit pois aime une lumière abondante mais supporte mal les fortes chaleurs. Idéalement 4 à 6 heures de soleil doux par jour (matin ou fin d’après-midi). Éviter le soleil brûlant de midi surtout en pot ou sur balcon plein sud. En intérieur, placer près d’une fenêtre très lumineuse.",
+
+      "watering_description": "Maintenir le sol frais mais jamais détrempé. Arroser davantage pendant la floraison et la formation des gousses.",
+
+      "fertilization": {
+        "full_ground": "En pleine terre : ajouter une fine couche de compost mûr en surface à la semaine 5-6. Aucun autre engrais nécessaire.",
+        "pot": "En pot : ajouter compost mûr à la semaine 5-6 puis un apport léger de compost liquide naturel à la semaine 8 pour soutenir la floraison."
+      },
+
+      "support_needed": true,
+      "care_description": "Installer un filet ou tuteur dès que les plants atteignent 15 cm. Désherber régulièrement. Pailler pour conserver l'humidité.",
+
+      "common_problems": {
+        "aphids": {
+          "what_is_it": "Petits insectes verts ou noirs qui s’installent sur les jeunes pousses et sucent la sève.",
+          "why_it_happens": "Apparaît surtout au printemps par temps doux.",
+          "solution": "Pulvériser eau + savon noir dilué. Favoriser les coccinelles."
+        },
+        "powdery_mildew": {
+          "what_is_it": "Maladie fongique formant une poudre blanche sur les feuilles.",
+          "why_it_happens": "Apparaît en fin de saison chaude avec humidité stagnante.",
+          "solution": "Pulvériser bicarbonate dilué ou décoction de prêle. Espacer les plants."
+        },
+        "yellow_leaves": {
+          "what_is_it": "Feuilles qui jaunissent prématurément.",
+          "why_it_happens": "Souvent causé par excès d’eau ou mauvais drainage.",
+          "solution": "Réduire l’arrosage et vérifier l’écoulement de l’eau."
+        }
+      }
+    },
+
+    "timeline_culture": {
+      "week_1_2": "Germination (jours 1-14). Maintenir humidité. Aucun engrais.",
+      "week_3_4": "Premières feuilles. Installer support si nécessaire.",
+      "week_5_6": "Croissance active. Ajouter compost mûr en surface.",
+      "week_7_8": "Développement végétatif. Surveiller pucerons.",
+      "week_9_10": "Floraison.",
+      "week_11_12": "Formation des gousses. Augmenter légèrement l’arrosage.",
+      "week_13_14": "Premières récoltes possibles.",
+      "week_15_16": "Récolte maximale.",
+      "week_17_plus": "Laisser certaines gousses sécher pour graines."
+    },
+
+    "harvest": {
+      "description": "Récolter entre 10 et 14 semaines après semis lorsque les gousses sont gonflées et vertes. Cueillir tous les 2-3 jours."
+    },
+
+    "seed_saving": {
+      "possible": true,
+      "timing": "À partir de la semaine 17+, lorsque les gousses deviennent brunâtres et sèches.",
+      "method": "Laisser sécher sur pied. Extraire les graines et les laisser sécher 5 à 7 jours avant stockage.",
+      "seed_viability_years": 3
+    }
+  },
+  {
+  "id": 2,
+
+  "general": {
+    "name": "Paris Island",
+    "plant_name": "Laitue romaine",
+    "latin_name": "Lactuca sativa",
+    "type": "Légume feuille",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 25, "max": 35 },
+    "in_stock": true,
+    "sowing_month_indoor": [2, 3, 4],
+    "sowing_month_outdoor": [3, 4, 5, 8, 9],
+    "harvest_months": [5, 6, 7, 9, 10],
+    "days_before_harvest_min": 60,
+    "days_before_harvest_max": 75,
+    "description": "La laitue romaine Paris Island est une variété classique produisant de longues feuilles croquantes formant une pomme allongée. Elle est idéale pour les salades fraîches et supporte mieux la chaleur que certaines laitues pommées. Adaptée aux débutants, elle pousse rapidement et peut être cultivée en pleine terre ou en pot."
+  },
+
+  "germination": {
+    "ideal_temp_c": { "min": 10, "max": 20 },
+    "duration_days": { "min": 5, "max": 10 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 3 },
+    "seeds_per_cell": 2,
+    "light_need": "La graine de laitue a besoin d'un peu de lumière pour bien germer. Ne pas enterrer profondément, recouvrir très légèrement de terre fine ou de vermiculite.",
+    "step_by_step": "Semer en surface dans un terreau fin et légèrement humide. Recouvrir très légèrement. Maintenir une humidité constante sans détremper. Placer dans un endroit lumineux mais sans soleil direct. Dès l'apparition des premières vraies feuilles, éclaircir pour ne garder qu'un plant par alvéole."
+  },
+
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Repiquer lorsque les plants possèdent 3 à 4 vraies feuilles et que les risques de fortes gelées sont passés. Endurcir progressivement les plants en les exposant quelques heures par jour à l'extérieur avant la mise en place définitive.",
+    "spacing_between_plants_cm": { "min": 25, "max": 30 },
+    "row_spacing_cm": { "min": 30, "max": 40 },
+    "pot_possible": true,
+    "pot_description": "Utiliser un pot d'au moins 20 cm de profondeur avec un bon drainage. Prévoir environ 5 à 7 litres de substrat par plant. Le terreau doit être riche, léger et garder l'humidité sans excès d'eau.",
+    "light_after_transplant": "Installer dans un endroit lumineux avec soleil doux le matin ou en fin de journée. Éviter le plein soleil brûlant de l'après-midi, surtout en été.",
+    "transplant_description": "Extraire délicatement la motte sans casser les racines. Planter au même niveau que dans le godet, tasser légèrement la terre autour du collet et arroser immédiatement. Maintenir le sol humide les premiers jours pour favoriser la reprise."
+  },
+
+  "growing": {
+    "exposure_type": ["Soleil doux", "Mi-ombre"],
+    "heat_sensitive_above_c": 28,
+    "exposure_description": "La laitue apprécie une lumière abondante mais non brûlante. Au printemps, elle peut recevoir du soleil direct modéré. En été, privilégier une exposition mi-ombragée pour éviter la montée en graines prématurée. En pot sur balcon, éviter les zones très exposées au soleil de midi.",
+    "watering_description": "Maintenir un sol constamment frais. Arroser régulièrement sans détremper. Un manque d'eau rend les feuilles amères et favorise la montée en graines. Arroser au pied pour éviter de mouiller excessivement le feuillage.",
+    "fertilization": {
+      "full_ground": "Incorporer du compost mûr au sol avant plantation. Un léger apport de compost en surface vers la semaine 4 à 5 favorise le développement des feuilles.",
+      "pot": "Utiliser un terreau enrichi au départ. Apporter un engrais liquide naturel doux (type purin d'ortie dilué) vers la semaine 4 à 6 si la croissance ralentit."
+    },
+    "support_needed": false,
+    "care_description": "Désherber régulièrement pour éviter la concurrence. Pailler le sol pour conserver l'humidité. Surveiller la montée en graines par temps chaud. Récolter progressivement les feuilles extérieures pour prolonger la production.",
+    "common_problems": {
+      "aphids": {
+        "what_is_it": "Petits insectes verts ou noirs qui se regroupent sous les feuilles et sur les jeunes pousses.",
+        "why_it_happens": "Apparaissent surtout par temps doux et sec, ou en cas d'excès d'azote.",
+        "solution": "Pulvériser une solution de savon noir dilué et favoriser la présence de coccinelles."
+      },
+      "powdery_mildew": {
+        "what_is_it": "Maladie fongique provoquant un dépôt blanc poudreux sur les feuilles.",
+        "why_it_happens": "Survient en conditions humides avec mauvaise circulation d'air.",
+        "solution": "Espacer correctement les plants, éviter l'arrosage sur le feuillage et traiter au bicarbonate dilué si nécessaire."
+      },
+      "yellow_leaves": {
+        "what_is_it": "Feuilles qui jaunissent prématurément.",
+        "why_it_happens": "Excès d'eau, drainage insuffisant ou carence nutritive légère.",
+        "solution": "Vérifier le drainage, ajuster l'arrosage et apporter un léger complément nutritif si besoin."
+      }
+    }
+  },
+
+  "timeline_culture": {
+    "week_1_2": "Germination et apparition des premières feuilles. Maintenir le sol humide sans excès.",
+    "week_3_4": "Développement des jeunes plants. Éclaircir si nécessaire et commencer exposition progressive au soleil doux.",
+    "week_5_6": "Croissance active des feuilles. Apport léger de compost en surface. Maintenir arrosage régulier.",
+    "week_7_8": "Formation de la pomme allongée. Surveiller humidité et protéger des fortes chaleurs.",
+    "week_9_10": "Développement final. Récolte possible des feuilles extérieures.",
+    "week_11_12": "Récolte principale de la pomme entière si elle est bien formée.",
+    "week_13_14": "Fin de cycle possible en conditions fraîches. Surveiller montée en graines.",
+    "week_15_16": "Montée en graines probable si températures élevées.",
+    "week_17_plus": "Floraison et production des graines si la plante n'a pas été récoltée."
+  },
+
+  "harvest": {
+    "description": "Récolter entre 60 et 75 jours après semis lorsque la pomme est bien formée et ferme. Couper à la base le matin pour une meilleure fraîcheur. Il est aussi possible de cueillir les feuilles extérieures au fur et à mesure pour prolonger la production."
+  },
+
+  "seed_saving": {
+    "possible": true,
+    "timing": "Environ 100 à 120 jours après semis, lorsque la plante monte en fleurs puis que les capitules produisent des aigrettes blanches.",
+    "method": "Laisser la plante fleurir complètement. Lorsque les fleurs sèchent et forment des petites aigrettes blanches, récolter les têtes sèches. Extraire les graines fines, les laisser sécher quelques jours supplémentaires puis stocker dans un endroit sec et sombre.",
+    "seed_viability_years": 4
+  }
+}
+
+]
