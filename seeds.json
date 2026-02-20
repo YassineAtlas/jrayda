@@ -200,6 +200,1247 @@
     "method": "Laisser la plante fleurir complètement. Lorsque les fleurs sèchent et forment des petites aigrettes blanches, récolter les têtes sèches. Extraire les graines fines, les laisser sécher quelques jours supplémentaires puis stocker dans un endroit sec et sombre.",
     "seed_viability_years": 4
   }
+},
+{
+  "id": 3,
+
+  "general": {
+    "name": "Saint Pierre",
+    "plant_name": "Tomate",
+    "latin_name": "Solanum lycopersicum",
+    "type": "Légume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Moyen",
+    "height_cm": { "min": 120, "max": 180 },
+    "in_stock": true,
+    "sowing_month_indoor": [2, 3, 4],
+    "sowing_month_outdoor": [4, 5],
+    "harvest_months": [6, 7, 8, 9, 10],
+    "days_before_harvest_min": 75,
+    "days_before_harvest_max": 90,
+    "description": "La tomate Saint Pierre est une variété ancienne productive et rustique, donnant des fruits ronds rouges de bonne taille. Elle convient bien au potager familial et se cultive facilement avec tuteurage et arrosage régulier."
+  },
+
+  "germination": {
+    "ideal_temp_c": { "min": 20, "max": 25 },
+    "duration_days": { "min": 6, "max": 10 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 3 },
+    "seeds_per_cell": 2,
+    "light_need": "Les graines n'ont pas besoin de lumière pour germer, mais une forte luminosité est indispensable dès la levée pour éviter l'étiolement.",
+    "step_by_step": "Semer en godets dans un terreau fin légèrement humide. Recouvrir d'une fine couche de substrat. Maintenir à 20-25°C et humide sans excès. Dès la levée, placer en lumière très vive."
+  },
+
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Repiquer lorsque les plants ont 5 à 7 vraies feuilles, après les dernières gelées, dans un sol réchauffé (minimum 12°C). Endurcir les plants sur 7 à 10 jours avant plantation définitive.",
+    "spacing_between_plants_cm": { "min": 50, "max": 60 },
+    "row_spacing_cm": { "min": 70, "max": 90 },
+    "pot_possible": true,
+    "pot_description": "Possible en grand pot de 25 à 30 litres minimum, avec drainage efficace et substrat riche en matière organique.",
+    "light_after_transplant": "Plein soleil (6 à 8 h par jour). Les 2 à 3 premiers jours, protéger légèrement si le soleil est très fort.",
+    "transplant_description": "Planter profondément en enterrant une partie de la tige pour favoriser l'émission de racines. Arroser abondamment après plantation puis installer un tuteur solide."
+  },
+
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 32,
+    "exposure_description": "La tomate Saint Pierre demande une exposition chaude et très lumineuse. Elle produit mieux en plein soleil, avec une bonne aération du feuillage pour limiter les maladies.",
+    "watering_description": "Arroser régulièrement au pied, sans mouiller le feuillage. Maintenir une humidité du sol stable pour éviter l'éclatement des fruits et la nécrose apicale.",
+    "fertilization": {
+      "full_ground": "Amender avec compost mûr avant plantation. Apporter un complément organique riche en potassium à partir de la floraison puis toutes les 2 à 3 semaines.",
+      "pot": "En pot, fertiliser plus fréquemment: engrais organique liquide pour tomates tous les 7 à 10 jours pendant la fructification."
+    },
+    "support_needed": true,
+    "care_description": "Tuteurer rapidement, attacher la tige au fur et à mesure et retirer les gourmands selon la conduite choisie. Pailler le sol pour conserver l'humidité et limiter les éclaboussures.",
+    "common_problems": {
+      "aphids": {
+        "what_is_it": "Petits insectes piqueurs qui colonisent les jeunes pousses et affaiblissent la plante.",
+        "why_it_happens": "Favorisés par un déséquilibre de croissance et des conditions douces.",
+        "solution": "Pulvériser savon noir dilué, surveiller les jeunes extrémités et favoriser les auxiliaires comme les coccinelles."
+      },
+      "powdery_mildew": {
+        "what_is_it": "Champignon formant un feutrage blanc sur les feuilles.",
+        "why_it_happens": "Apparaît avec alternance chaleur/humidité et mauvaise circulation d'air.",
+        "solution": "Aérer la végétation, éviter l'arrosage sur feuilles, supprimer les parties atteintes et traiter préventivement si besoin."
+      },
+      "yellow_leaves": {
+        "what_is_it": "Jaunissement progressif du feuillage, surtout bas de plante.",
+        "why_it_happens": "Arrosage irrégulier, carence nutritive ou stress racinaire.",
+        "solution": "Régulariser l'arrosage, enrichir modérément en nutriments et pailler pour stabiliser l'humidité."
+      }
+    }
+  },
+
+  "timeline_culture": {
+    "week_1_2": "Germination en godets. Chaleur stable et forte lumière après levée.",
+    "week_3_4": "Croissance des jeunes plants. Éclaircir et éventuellement repiquer en godets plus grands.",
+    "week_5_6": "Endurcissement progressif avant mise en place extérieure.",
+    "week_7_8": "Plantation définitive, tuteurage et arrosage d'installation.",
+    "week_9_10": "Reprise végétative active. Surveillance des ravageurs et premiers bouquets floraux.",
+    "week_11_12": "Floraison puis nouaison. Maintenir arrosage régulier.",
+    "week_13_14": "Grossissement des fruits. Apports nutritifs riches en potassium.",
+    "week_15_16": "Début des récoltes des fruits bien colorés.",
+    "week_17_plus": "Pleine production puis fin de cycle selon climat. Sélection possible de fruits pour récupération de graines."
+  },
+
+  "harvest": {
+    "description": "Récolter environ 75 à 90 jours après transplantation, quand les fruits sont bien rouges et légèrement souples au toucher. Cueillir régulièrement pour stimuler la production."
+  },
+
+  "seed_saving": {
+    "possible": true,
+    "timing": "En fin de saison, choisir des fruits très mûrs sur des plants sains.",
+    "method": "Prélever les graines avec le gel, laisser fermenter 2 à 3 jours, rincer, puis sécher complètement avant stockage en sachet au sec.",
+    "seed_viability_years": 4
+  }
+},
+{
+  "id": 4,
+
+  "general": {
+    "name": "Ashley",
+    "plant_name": "Concombre",
+    "latin_name": "Cucumis sativus",
+    "type": "Légume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 120, "max": 250 },
+    "in_stock": true,
+    "sowing_month_indoor": [3, 4, 5],
+    "sowing_month_outdoor": [5, 6],
+    "harvest_months": [7, 8, 9],
+    "days_before_harvest_min": 55,
+    "days_before_harvest_max": 70,
+    "description": "Le concombre Ashley est une variété productive et vigoureuse, appréciée pour ses fruits allongés, croquants et réguliers. Elle convient bien à la culture en pleine terre et sous abri, avec une récolte continue en saison."
+  },
+
+  "germination": {
+    "ideal_temp_c": { "min": 22, "max": 30 },
+    "duration_days": { "min": 4, "max": 8 },
+    "depth_cm": { "min": 1, "max": 2 },
+    "spacing_between_seeds_cm": { "min": 3, "max": 5 },
+    "seeds_per_cell": 1,
+    "light_need": "Les graines n'ont pas besoin de lumière pour germer. Après la levée, placer immédiatement en forte lumière pour obtenir des plants compacts.",
+    "step_by_step": "Semer en godets individuels dans un terreau léger et humide. Enterrer la graine à 1-2 cm. Maintenir une température chaude et stable. Arroser modérément et garder le substrat légèrement humide jusqu'à la levée."
+  },
+
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Planter lorsque les risques de gel sont écartés et que le sol est bien réchauffé (minimum 15°C). Repiquer des plants de 3 à 4 vraies feuilles après endurcissement progressif.",
+    "spacing_between_plants_cm": { "min": 50, "max": 70 },
+    "row_spacing_cm": { "min": 90, "max": 120 },
+    "pot_possible": true,
+    "pot_description": "Possible en pot de 20 à 30 litres minimum, avec substrat riche, drainage efficace et arrosages réguliers.",
+    "light_after_transplant": "Plein soleil à soleil doux, à l'abri des vents froids.",
+    "transplant_description": "Repiquer avec la motte intacte pour éviter le stress racinaire. Arroser copieusement après plantation puis pailler pour garder l'humidité."
+  },
+
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 35,
+    "exposure_description": "Le concombre Ashley aime la chaleur et la lumière. Une exposition ensoleillée avec sol riche et vivant favorise une production régulière.",
+    "watering_description": "Arroser régulièrement au pied, sans mouiller le feuillage. Garder un sol frais et constant pour éviter l'amertume des fruits et les blocages de croissance.",
+    "fertilization": {
+      "full_ground": "Incorporer du compost mûr avant plantation. Ajouter un apport organique léger toutes les 2 à 3 semaines en période de production.",
+      "pot": "En pot, apporter un engrais organique liquide équilibré tous les 7 à 10 jours pendant la floraison et la fructification."
+    },
+    "support_needed": true,
+    "care_description": "Conduire sur treillis ou filet pour des fruits plus propres et une meilleure aération. Récolter fréquemment pour stimuler la mise à fruits.",
+    "common_problems": {
+      "aphids": {
+        "what_is_it": "Petits insectes qui se regroupent sur les jeunes pousses et affaiblissent la plante.",
+        "why_it_happens": "Favorisés par temps doux et croissance tendre.",
+        "solution": "Pulvériser savon noir dilué, doucher les colonies et favoriser les auxiliaires."
+      },
+      "powdery_mildew": {
+        "what_is_it": "Maladie fongique formant une poudre blanche sur les feuilles.",
+        "why_it_happens": "Fréquente en fin de saison, surtout avec humidité stagnante et manque d'aération.",
+        "solution": "Espacer les plants, éviter de mouiller le feuillage, supprimer les feuilles atteintes et traiter préventivement si nécessaire."
+      },
+      "yellow_leaves": {
+        "what_is_it": "Feuilles qui jaunissent puis sèchent prématurément.",
+        "why_it_happens": "Souvent lié à un arrosage irrégulier, une carence nutritive ou un système racinaire stressé.",
+        "solution": "Régulariser l'arrosage, nourrir modérément et pailler le sol pour limiter les écarts d'humidité."
+      }
+    }
+  },
+
+  "timeline_culture": {
+    "week_1_2": "Germination rapide en chaleur douce. Maintenir substrat humide sans excès.",
+    "week_3_4": "Développement des jeunes plants. Préparer le sol de plantation.",
+    "week_5_6": "Plantation en place après gelées. Arrosage d'installation et paillage.",
+    "week_7_8": "Croissance vigoureuse des tiges. Installer ou guider sur support.",
+    "week_9_10": "Floraison puis premiers petits fruits.",
+    "week_11_12": "Début des récoltes. Cueillir souvent pour relancer la production.",
+    "week_13_14": "Production soutenue. Suivre arrosage et nutrition.",
+    "week_15_16": "Pleine récolte selon chaleur et entretien.",
+    "week_17_plus": "Fin de cycle progressive. Sélection possible de fruits mûrs pour graines."
+  },
+
+  "harvest": {
+    "description": "Récolter environ 55 à 70 jours après semis, quand les fruits sont bien verts, fermes et avant jaunissement. Une cueillette régulière améliore le rendement."
+  },
+
+  "seed_saving": {
+    "possible": true,
+    "timing": "En fin de saison, laisser quelques fruits grossir complètement jusqu'à maturité physiologique.",
+    "method": "Prélever les graines de fruits très mûrs, rincer, sécher complètement puis stocker à l'abri de l'humidité et de la chaleur.",
+    "seed_viability_years": 5
+  }
+},
+{
+  "id": 5,
+
+  "general": {
+    "name": "Feggouz vert",
+    "plant_name": "Concombre arménien",
+    "latin_name": "Cucumis melo var. flexuosus",
+    "type": "Légume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 150, "max": 300 },
+    "in_stock": true,
+    "sowing_month_indoor": [2, 3, 4, 5],
+    "sowing_month_outdoor": [4, 5, 6],
+    "harvest_months": [7, 8, 9, 10],
+    "days_before_harvest_min": 60,
+    "days_before_harvest_max": 80,
+    "description": "Le Feggouz vert (aussi appelé feggous) est un concombre arménien à fruits longs, croquants et très doux, sans amertume marquée. Variété productive en climat chaud, adaptée à la pleine terre et à la conduite sur treillis."
+  },
+
+  "germination": {
+    "ideal_temp_c": { "min": 22, "max": 30 },
+    "duration_days": { "min": 4, "max": 8 },
+    "depth_cm": { "min": 1, "max": 2 },
+    "spacing_between_seeds_cm": { "min": 3, "max": 5 },
+    "seeds_per_cell": 1,
+    "light_need": "Les graines n'ont pas besoin de lumière pour germer. Après la levée, une forte luminosité est nécessaire pour éviter des plants filés.",
+    "step_by_step": "Semer en godets individuels dans un substrat léger et humide. Recouvrir de 1 à 2 cm de terreau. Maintenir chaud et humide sans excès d'eau. Mettre en pleine lumière dès la levée."
+  },
+
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Planter après les dernières gelées lorsque le sol dépasse 15°C. Repiquer au stade 3 à 4 vraies feuilles après un endurcissement de 7 jours.",
+    "spacing_between_plants_cm": { "min": 60, "max": 80 },
+    "row_spacing_cm": { "min": 100, "max": 150 },
+    "pot_possible": true,
+    "pot_description": "Possible en très grand pot de 30 litres minimum, avec support vertical, substrat riche et arrosage régulier.",
+    "light_after_transplant": "Plein soleil. Protéger les premiers jours si vent froid ou soleil brûlant brutal.",
+    "transplant_description": "Repiquer avec la motte intacte, arroser abondamment puis pailler. Installer un treillis rapidement pour guider les tiges."
+  },
+
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 36,
+    "exposure_description": "Le Feggouz vert aime les conditions chaudes et lumineuses. Une exposition ensoleillée et abritée du vent améliore la vigueur et la qualité des fruits.",
+    "watering_description": "Arroser régulièrement au pied pour maintenir un sol frais sans saturation. Les à-coups d'arrosage peuvent ralentir la croissance et dégrader la qualité des fruits.",
+    "fertilization": {
+      "full_ground": "Apporter du compost mûr avant plantation. Ajouter un complément organique léger toutes les 2 à 3 semaines en période de fructification.",
+      "pot": "En pot, fertiliser chaque 7 à 10 jours avec un engrais organique liquide équilibré pendant la production."
+    },
+    "support_needed": true,
+    "care_description": "Conduire sur treillis pour obtenir des fruits droits et bien aérés. Récolter jeune et souvent pour stimuler une production continue.",
+    "common_problems": {
+      "aphids": {
+        "what_is_it": "Petits insectes suceurs installés sur jeunes pousses et revers des feuilles.",
+        "why_it_happens": "Favorisés par chaleur douce et végétation tendre.",
+        "solution": "Pulvériser une solution de savon noir dilué et favoriser les insectes auxiliaires."
+      },
+      "powdery_mildew": {
+        "what_is_it": "Champignon blanc poudreux sur les feuilles.",
+        "why_it_happens": "Survient avec humidité stagnante, stress hydrique et manque d'aération.",
+        "solution": "Aérer les plants, éviter l'arrosage du feuillage, retirer les feuilles atteintes et traiter préventivement si besoin."
+      },
+      "yellow_leaves": {
+        "what_is_it": "Feuilles qui jaunissent et perdent de la vigueur.",
+        "why_it_happens": "Souvent causé par arrosage irrégulier, carence nutritive ou fatigue de fin de cycle.",
+        "solution": "Régulariser les apports d'eau, nourrir modérément et pailler pour stabiliser l'humidité."
+      }
+    }
+  },
+
+  "timeline_culture": {
+    "week_1_2": "Germination en chaleur. Maintenir humidité constante sans excès.",
+    "week_3_4": "Croissance des jeunes plants en godets et exposition lumineuse maximale.",
+    "week_5_6": "Endurcissement puis plantation après gelées.",
+    "week_7_8": "Forte croissance végétative. Installation/attache sur treillis.",
+    "week_9_10": "Floraison et nouaison des premiers fruits.",
+    "week_11_12": "Début des récoltes de fruits jeunes, tendres et croquants.",
+    "week_13_14": "Production soutenue. Surveillance de l'arrosage et de l'oïdium.",
+    "week_15_16": "Pleine récolte en conditions chaudes régulières.",
+    "week_17_plus": "Fin progressive de cycle. Sélection de fruits mûrs pour production de graines."
+  },
+
+  "harvest": {
+    "description": "Récolter environ 60 à 80 jours après semis, de préférence quand les fruits sont encore jeunes et fermes, avant surmaturité. Cueillir fréquemment pour maintenir la production."
+  },
+
+  "seed_saving": {
+    "possible": true,
+    "timing": "En fin de saison, laisser quelques fruits aller à pleine maturité sur le plant.",
+    "method": "Prélever les graines de fruits très mûrs, rincer pour retirer la pulpe, sécher soigneusement puis stocker au sec et à l'abri de la chaleur.",
+    "seed_viability_years": 5
+  }
+},
+{
+  "id": 6,
+
+  "general": {
+    "name": "Blanche",
+    "plant_name": "Moutarde",
+    "latin_name": "Sinapis alba",
+    "type": "Légume feuille / Engrais vert",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 50, "max": 120 },
+    "in_stock": true,
+    "sowing_month_indoor": [2, 3, 4, 9],
+    "sowing_month_outdoor": [3, 4, 5, 8, 9, 10],
+    "harvest_months": [4, 5, 6, 9, 10, 11],
+    "days_before_harvest_min": 25,
+    "days_before_harvest_max": 45,
+    "description": "La moutarde blanche est une plante rapide et rustique, cultivée pour ses jeunes feuilles, ses graines, ou comme engrais vert. Elle lève vite, couvre bien le sol et convient aux jardiniers débutants."
+  },
+
+  "germination": {
+    "ideal_temp_c": { "min": 12, "max": 22 },
+    "duration_days": { "min": 3, "max": 7 },
+    "depth_cm": { "min": 1, "max": 2 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 5 },
+    "seeds_per_cell": 2,
+    "light_need": "Les graines n'ont pas besoin de lumière pour germer. Après levée, placer en zone lumineuse pour limiter l'étiolement.",
+    "step_by_step": "Semer en lignes ou à la volée sur sol ameubli. Recouvrir légèrement (1 à 2 cm), tasser puis arroser en pluie fine. Maintenir le sol frais jusqu'à la levée."
+  },
+
+  "transplant": {
+    "possible": false,
+    "possible_conditions": "La moutarde blanche se sème surtout directement en place, car elle pousse vite et n'apprécie pas trop le repiquage.",
+    "spacing_between_plants_cm": { "min": 10, "max": 20 },
+    "row_spacing_cm": { "min": 20, "max": 30 },
+    "pot_possible": true,
+    "pot_description": "Possible en jardinière ou pot peu profond (15 à 20 cm), surtout pour récolte en jeunes pousses.",
+    "light_after_transplant": "Non applicable pour une culture en semis direct.",
+    "transplant_description": "En cas de semis en alvéoles, repiquer très jeune avec motte entière pour limiter le stress."
+  },
+
+  "growing": {
+    "exposure_type": ["Soleil doux", "Mi-ombre"],
+    "heat_sensitive_above_c": 30,
+    "exposure_description": "La moutarde blanche pousse bien au soleil modéré ou en mi-ombre légère. Les fortes chaleurs accélèrent la montée en fleurs.",
+    "watering_description": "Arroser régulièrement pour garder un sol frais, surtout pour une récolte tendre des feuilles. Éviter les excès d'eau stagnante.",
+    "fertilization": {
+      "full_ground": "Généralement aucun apport important n'est nécessaire. Un sol vivant avec un peu de compost en surface suffit.",
+      "pot": "En pot, un léger apport de compost ou un engrais organique doux toutes les 3 à 4 semaines suffit."
+    },
+    "support_needed": false,
+    "care_description": "Éclaircir si semis dense. Désherber légèrement en début de culture. Récolter tôt pour des feuilles plus douces.",
+    "common_problems": {
+      "aphids": {
+        "what_is_it": "Petits insectes suceurs présents sur jeunes pousses et hampes florales.",
+        "why_it_happens": "Favorisés par temps doux et sec.",
+        "solution": "Pulvériser savon noir dilué et favoriser les auxiliaires (coccinelles, syrphes)."
+      },
+      "powdery_mildew": {
+        "what_is_it": "Champignon en feutrage blanc sur les feuilles.",
+        "why_it_happens": "Apparaît en fin de cycle avec humidité stagnante et stress.",
+        "solution": "Aérer les semis, éviter l'excès d'eau sur le feuillage et supprimer les parties touchées."
+      },
+      "yellow_leaves": {
+        "what_is_it": "Feuilles jaunissantes et croissance ralentie.",
+        "why_it_happens": "Souvent lié à un stress hydrique, un semis trop dense ou un sol appauvri.",
+        "solution": "Régulariser l'arrosage, éclaircir et apporter un léger compost de surface."
+      }
+    }
+  },
+
+  "timeline_culture": {
+    "week_1_2": "Levée rapide et installation des plantules.",
+    "week_3_4": "Développement des feuilles. Première récolte possible en jeunes pousses.",
+    "week_5_6": "Croissance active. Récolte feuille à feuille possible.",
+    "week_7_8": "Début de montée possible selon chaleur et date de semis.",
+    "week_9_10": "Floraison progressive en conditions chaudes.",
+    "week_11_12": "Formation des siliques (gousses de graines).",
+    "week_13_14": "Maturation des graines.",
+    "week_15_16": "Récolte des graines et fin de cycle.",
+    "week_17_plus": "Cycle terminé ou resemer pour une nouvelle rotation."
+  },
+
+  "harvest": {
+    "description": "Récolter les jeunes feuilles dès 25 à 45 jours après semis. Pour les graines, attendre le brunissement des siliques puis couper et faire sécher."
+  },
+
+  "seed_saving": {
+    "possible": true,
+    "timing": "Lorsque les siliques jaunissent puis brunissent en fin de cycle.",
+    "method": "Couper les tiges porte-graines, finir le séchage à l'abri, battre les siliques, trier puis stocker les graines bien sèches.",
+    "seed_viability_years": 5
+  }
+},
+{
+  "id": 7,
+  "general": {
+    "name": "Cerise",
+    "plant_name": "Tomate",
+    "latin_name": "Solanum lycopersicum var. cerasiforme",
+    "type": "Legume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 120, "max": 220 },
+    "in_stock": true,
+    "sowing_month_indoor": [2, 3, 4],
+    "sowing_month_outdoor": [4, 5],
+    "harvest_months": [6, 7, 8, 9, 10],
+    "days_before_harvest_min": 65,
+    "days_before_harvest_max": 80,
+    "description": "Tomate cerise productive et precoce."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 20, "max": 25 },
+    "duration_days": { "min": 5, "max": 10 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 3 },
+    "seeds_per_cell": 2,
+    "light_need": "Forte lumiere des la levee.",
+    "step_by_step": "Semer en godets, garder chaud et humide."
+  },
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Planter apres les dernieres gelees.",
+    "spacing_between_plants_cm": { "min": 45, "max": 60 },
+    "row_spacing_cm": { "min": 70, "max": 90 },
+    "pot_possible": true,
+    "pot_description": "Pot 20 a 30 L minimum.",
+    "light_after_transplant": "Plein soleil.",
+    "transplant_description": "Planter profondement puis pailler."
+  },
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 32,
+    "exposure_description": "Aime chaleur et lumiere.",
+    "watering_description": "Arroser regulierement au pied.",
+    "fertilization": {
+      "full_ground": "Compost puis apport potassique en production.",
+      "pot": "Engrais liquide tous les 7 a 10 jours."
+    },
+    "support_needed": true,
+    "care_description": "Tuteurer et recolter frequemment.",
+    "common_problems": {
+      "aphids": {
+        "what_is_it": "Insectes suceurs sur jeunes pousses.",
+        "why_it_happens": "Temps doux.",
+        "solution": "Savon noir dilue."
+      },
+      "powdery_mildew": {
+        "what_is_it": "Poudre blanche sur feuilles.",
+        "why_it_happens": "Manque d'aeration.",
+        "solution": "Aerer et retirer feuilles atteintes."
+      },
+      "yellow_leaves": {
+        "what_is_it": "Feuilles jaunissantes.",
+        "why_it_happens": "Arrosage irregulier ou carence.",
+        "solution": "Regulariser eau et nutrition."
+      }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Germination.",
+    "week_3_4": "Jeunes plants.",
+    "week_5_6": "Endurcissement.",
+    "week_7_8": "Plantation.",
+    "week_9_10": "Floraison.",
+    "week_11_12": "Nouaison.",
+    "week_13_14": "Debut recoltes.",
+    "week_15_16": "Production active.",
+    "week_17_plus": "Fin de cycle."
+  },
+  "harvest": {
+    "description": "Recolter tous les 2 a 3 jours a maturite coloree."
+  },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Fin de saison sur fruits tres murs.",
+    "method": "Fermentation courte, rincage, sechage.",
+    "seed_viability_years": 4
+  }
+},
+{
+  "id": 8,
+  "general": {
+    "name": "Campbell 33",
+    "plant_name": "Tomate",
+    "latin_name": "Solanum lycopersicum",
+    "type": "Legume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Moyen",
+    "height_cm": { "min": 130, "max": 190 },
+    "in_stock": true,
+    "sowing_month_indoor": [2, 3, 4],
+    "sowing_month_outdoor": [4, 5],
+    "harvest_months": [7, 8, 9, 10],
+    "days_before_harvest_min": 75,
+    "days_before_harvest_max": 90,
+    "description": "Tomate charnue, productive, usage cuisine."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 20, "max": 25 },
+    "duration_days": { "min": 6, "max": 10 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 3 },
+    "seeds_per_cell": 2,
+    "light_need": "Forte lumiere apres levee.",
+    "step_by_step": "Semis en godets au chaud."
+  },
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Apres gel.",
+    "spacing_between_plants_cm": { "min": 50, "max": 70 },
+    "row_spacing_cm": { "min": 80, "max": 100 },
+    "pot_possible": true,
+    "pot_description": "Pot 30 L minimum.",
+    "light_after_transplant": "Plein soleil.",
+    "transplant_description": "Planter profondement et tuteurer."
+  },
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 32,
+    "exposure_description": "Chaleur stable et aeration.",
+    "watering_description": "Arrosage regulier au pied.",
+    "fertilization": {
+      "full_ground": "Compost + potassium en production.",
+      "pot": "Apport liquide hebdomadaire."
+    },
+    "support_needed": true,
+    "care_description": "Taille selon conduite et tuteurage.",
+    "common_problems": {
+      "aphids": {
+        "what_is_it": "Pucerons.",
+        "why_it_happens": "Temps doux.",
+        "solution": "Savon noir dilue."
+      },
+      "powdery_mildew": {
+        "what_is_it": "Poudre blanche.",
+        "why_it_happens": "Humidite + faible circulation d'air.",
+        "solution": "Aerer et supprimer feuilles touchees."
+      },
+      "yellow_leaves": {
+        "what_is_it": "Jaunissement foliaire.",
+        "why_it_happens": "Stress hydrique/carence.",
+        "solution": "Regulariser arrosage et nutrition."
+      }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Levee.",
+    "week_3_4": "Croissance.",
+    "week_5_6": "Endurcissement.",
+    "week_7_8": "Plantation.",
+    "week_9_10": "Floraison.",
+    "week_11_12": "Nouaison.",
+    "week_13_14": "Grossissement.",
+    "week_15_16": "Debut recolte.",
+    "week_17_plus": "Production continue."
+  },
+  "harvest": {
+    "description": "Recolte environ 75 a 90 jours apres transplantation."
+  },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Fin de saison.",
+    "method": "Fermenter puis secher les graines.",
+    "seed_viability_years": 4
+  }
+},
+{
+  "id": 9,
+  "general": {
+    "name": "Buenos Aires",
+    "plant_name": "Haricot",
+    "latin_name": "Phaseolus vulgaris",
+    "type": "Legume",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 40, "max": 220 },
+    "in_stock": true,
+    "sowing_month_indoor": [4, 5],
+    "sowing_month_outdoor": [5, 6, 7],
+    "harvest_months": [7, 8, 9, 10],
+    "days_before_harvest_min": 55,
+    "days_before_harvest_max": 75,
+    "description": "Haricot vigoureux et productif."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 16, "max": 28 },
+    "duration_days": { "min": 6, "max": 10 },
+    "depth_cm": { "min": 2, "max": 4 },
+    "spacing_between_seeds_cm": { "min": 8, "max": 12 },
+    "seeds_per_cell": 1,
+    "light_need": "Pas de lumiere avant levee.",
+    "step_by_step": "Semis direct en sol rechauffe."
+  },
+  "transplant": {
+    "possible": false,
+    "possible_conditions": "Prefere semis direct.",
+    "spacing_between_plants_cm": { "min": 10, "max": 15 },
+    "row_spacing_cm": { "min": 40, "max": 60 },
+    "pot_possible": true,
+    "pot_description": "Possible en bac profond.",
+    "light_after_transplant": "Non applicable en semis direct.",
+    "transplant_description": "Eviter le repiquage."
+  },
+  "growing": {
+    "exposure_type": ["Plein soleil", "Soleil doux"],
+    "heat_sensitive_above_c": 34,
+    "exposure_description": "Aime chaleur moderee.",
+    "watering_description": "Arroser surtout en floraison.",
+    "fertilization": {
+      "full_ground": "Compost de base suffisant.",
+      "pot": "Apport leger si besoin."
+    },
+    "support_needed": true,
+    "care_description": "Installer support selon port.",
+    "common_problems": {
+      "aphids": {
+        "what_is_it": "Pucerons sur jeunes pousses.",
+        "why_it_happens": "Temps doux/sec.",
+        "solution": "Savon noir dilue."
+      },
+      "powdery_mildew": {
+        "what_is_it": "Depot blanc sur feuilles.",
+        "why_it_happens": "Manque d'air.",
+        "solution": "Aerer et espacer."
+      },
+      "yellow_leaves": {
+        "what_is_it": "Jaunissement foliaire.",
+        "why_it_happens": "Exc es d'eau ou faim d'azote.",
+        "solution": "Ajuster arrosage et compost."
+      }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Levee.",
+    "week_3_4": "Croissance vegetative.",
+    "week_5_6": "Support en place.",
+    "week_7_8": "Floraison.",
+    "week_9_10": "Gousses.",
+    "week_11_12": "Debut recoltes.",
+    "week_13_14": "Production active.",
+    "week_15_16": "Recoltes continues.",
+    "week_17_plus": "Fin de cycle."
+  },
+  "harvest": {
+    "description": "Recolter regulierement pour prolonger la production."
+  },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Quand les gousses sechent.",
+    "method": "Sechage sur pied puis extraction.",
+    "seed_viability_years": 3
+  }
+},
+{
+  "id": 10,
+  "general": {
+    "name": "Roma",
+    "plant_name": "Tomate",
+    "latin_name": "Solanum lycopersicum",
+    "type": "Legume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 90, "max": 160 },
+    "in_stock": true,
+    "sowing_month_indoor": [2, 3, 4],
+    "sowing_month_outdoor": [4, 5],
+    "harvest_months": [7, 8, 9, 10],
+    "days_before_harvest_min": 75,
+    "days_before_harvest_max": 90,
+    "description": "Tomate Roma charnue, ideale pour sauces."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 20, "max": 25 },
+    "duration_days": { "min": 5, "max": 10 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 3 },
+    "seeds_per_cell": 2,
+    "light_need": "Forte lumiere apres levee.",
+    "step_by_step": "Semis en godets, chaleur constante."
+  },
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Apres gel sur sol chaud.",
+    "spacing_between_plants_cm": { "min": 45, "max": 60 },
+    "row_spacing_cm": { "min": 70, "max": 90 },
+    "pot_possible": true,
+    "pot_description": "Pot 20 a 30 L.",
+    "light_after_transplant": "Plein soleil.",
+    "transplant_description": "Planter profondement puis pailler."
+  },
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 32,
+    "exposure_description": "Aime chaleur stable.",
+    "watering_description": "Arroser au pied de facon reguliere.",
+    "fertilization": {
+      "full_ground": "Compost de fond + apport potassium.",
+      "pot": "Engrais liquide regulier."
+    },
+    "support_needed": true,
+    "care_description": "Tuteurer et eliminer feuilles malades.",
+    "common_problems": {
+      "aphids": {
+        "what_is_it": "Pucerons.",
+        "why_it_happens": "Temps doux.",
+        "solution": "Savon noir dilue."
+      },
+      "powdery_mildew": {
+        "what_is_it": "Poudre blanche.",
+        "why_it_happens": "Mauvaise aeration.",
+        "solution": "Aerer et couper parties atteintes."
+      },
+      "yellow_leaves": {
+        "what_is_it": "Jaunissement progressif.",
+        "why_it_happens": "Stress hydrique/carence.",
+        "solution": "Stabiliser arrosage et nutrition."
+      }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Levee.",
+    "week_3_4": "Jeunes plants.",
+    "week_5_6": "Endurcissement.",
+    "week_7_8": "Plantation.",
+    "week_9_10": "Croissance active.",
+    "week_11_12": "Floraison.",
+    "week_13_14": "Formation des fruits.",
+    "week_15_16": "Debut recoltes.",
+    "week_17_plus": "Production continue."
+  },
+  "harvest": {
+    "description": "Recolter les fruits rouges fermes."
+  },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Fin de saison.",
+    "method": "Fermentation puis sechage complet.",
+    "seed_viability_years": 4
+  }
+},
+{
+  "id": 11,
+  "general": {
+    "name": "National Pickles",
+    "plant_name": "Cornichon",
+    "latin_name": "Cucumis sativus",
+    "type": "Legume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 80, "max": 220 },
+    "in_stock": true,
+    "sowing_month_indoor": [3, 4, 5],
+    "sowing_month_outdoor": [5, 6],
+    "harvest_months": [7, 8, 9],
+    "days_before_harvest_min": 50,
+    "days_before_harvest_max": 65,
+    "description": "Cornichon precoce et productif pour conservation."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 22, "max": 30 },
+    "duration_days": { "min": 4, "max": 8 },
+    "depth_cm": { "min": 1, "max": 2 },
+    "spacing_between_seeds_cm": { "min": 3, "max": 5 },
+    "seeds_per_cell": 1,
+    "light_need": "Forte lumiere apres levee.",
+    "step_by_step": "Semis chaud en godets ou direct sur sol rechauffe."
+  },
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Apres les dernieres gelees.",
+    "spacing_between_plants_cm": { "min": 40, "max": 60 },
+    "row_spacing_cm": { "min": 90, "max": 120 },
+    "pot_possible": true,
+    "pot_description": "Pot 20 a 30 L avec support.",
+    "light_after_transplant": "Plein soleil.",
+    "transplant_description": "Repiquer avec motte intacte, arroser puis pailler."
+  },
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 35,
+    "exposure_description": "Aime chaleur et lumiere.",
+    "watering_description": "Arroser regulierement au pied.",
+    "fertilization": {
+      "full_ground": "Compost de base + apports legers.",
+      "pot": "Engrais liquide doux tous les 7 a 10 jours."
+    },
+    "support_needed": true,
+    "care_description": "Recolter petit calibre tres souvent.",
+    "common_problems": {
+      "aphids": { "what_is_it": "Pucerons.", "why_it_happens": "Temps doux.", "solution": "Savon noir dilue." },
+      "powdery_mildew": { "what_is_it": "Poudre blanche.", "why_it_happens": "Humidite + manque d'air.", "solution": "Aerer et eviter arrosage sur feuillage." },
+      "yellow_leaves": { "what_is_it": "Jaunissement foliaire.", "why_it_happens": "Stress hydrique/nutritif.", "solution": "Regulariser eau et nutrition." }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Germination.",
+    "week_3_4": "Jeunes plants.",
+    "week_5_6": "Plantation.",
+    "week_7_8": "Croissance rapide.",
+    "week_9_10": "Floraison.",
+    "week_11_12": "Premiers fruits.",
+    "week_13_14": "Recoltes frequentes.",
+    "week_15_16": "Pleine production.",
+    "week_17_plus": "Fin de cycle."
+  },
+  "harvest": { "description": "Cueillir tous les 1 a 2 jours pour qualite optimale." },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Laisser quelques fruits murir completement.",
+    "method": "Extraire, rincer et secher completement les graines.",
+    "seed_viability_years": 5
+  }
+},
+{
+  "id": 12,
+  "general": {
+    "name": "Gold Nugget",
+    "plant_name": "Tomate cerise",
+    "latin_name": "Solanum lycopersicum var. cerasiforme",
+    "type": "Legume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 80, "max": 130 },
+    "in_stock": true,
+    "sowing_month_indoor": [2, 3, 4],
+    "sowing_month_outdoor": [4, 5],
+    "harvest_months": [6, 7, 8, 9],
+    "days_before_harvest_min": 55,
+    "days_before_harvest_max": 70,
+    "description": "Tomate cerise jaune tres precoce et douce."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 20, "max": 25 },
+    "duration_days": { "min": 5, "max": 10 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 3 },
+    "seeds_per_cell": 2,
+    "light_need": "Forte lumiere apres levee.",
+    "step_by_step": "Semis chaud en godets."
+  },
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Apres gel.",
+    "spacing_between_plants_cm": { "min": 40, "max": 55 },
+    "row_spacing_cm": { "min": 60, "max": 80 },
+    "pot_possible": true,
+    "pot_description": "Tres adaptee en pot 15 a 25 L.",
+    "light_after_transplant": "Plein soleil.",
+    "transplant_description": "Planter profondement puis pailler."
+  },
+  "growing": {
+    "exposure_type": ["Plein soleil", "Soleil doux"],
+    "heat_sensitive_above_c": 32,
+    "exposure_description": "Precoce et assez tolerante aux climats frais.",
+    "watering_description": "Arrosage regulier au pied.",
+    "fertilization": {
+      "full_ground": "Compost puis apports legers.",
+      "pot": "Fertilisation liquide reguliere."
+    },
+    "support_needed": true,
+    "care_description": "Tuteur leger et recolte frequente.",
+    "common_problems": {
+      "aphids": { "what_is_it": "Pucerons.", "why_it_happens": "Temps doux.", "solution": "Savon noir dilue." },
+      "powdery_mildew": { "what_is_it": "Poudre blanche.", "why_it_happens": "Humidite stagnante.", "solution": "Aerer et supprimer feuilles atteintes." },
+      "yellow_leaves": { "what_is_it": "Jaunissement foliaire.", "why_it_happens": "Stress hydrique/carence.", "solution": "Arrosage stable et nutrition adaptee." }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Levee.",
+    "week_3_4": "Croissance semis.",
+    "week_5_6": "Endurcissement.",
+    "week_7_8": "Plantation.",
+    "week_9_10": "Floraison.",
+    "week_11_12": "Premiers fruits.",
+    "week_13_14": "Debut recoltes.",
+    "week_15_16": "Production active.",
+    "week_17_plus": "Fin de cycle."
+  },
+  "harvest": { "description": "Recolter quand les fruits sont bien jaunes et fermes." },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Fin de saison.",
+    "method": "Fermentation courte puis sechage des graines.",
+    "seed_viability_years": 4
+  }
+},
+{
+  "id": 13,
+  "general": {
+    "name": "Basilic",
+    "plant_name": "Basilic",
+    "latin_name": "Ocimum basilicum",
+    "type": "Aromatique",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 25, "max": 60 },
+    "in_stock": true,
+    "sowing_month_indoor": [3, 4, 5],
+    "sowing_month_outdoor": [5, 6, 7],
+    "harvest_months": [6, 7, 8, 9, 10],
+    "days_before_harvest_min": 35,
+    "days_before_harvest_max": 55,
+    "description": "Aromatique productive, recolte feuille a feuille."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 20, "max": 26 },
+    "duration_days": { "min": 5, "max": 10 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 4 },
+    "seeds_per_cell": 3,
+    "light_need": "Lumiere vive apres levee.",
+    "step_by_step": "Semer peu profond, garder chaud et humide."
+  },
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Repiquer apres gel.",
+    "spacing_between_plants_cm": { "min": 20, "max": 30 },
+    "row_spacing_cm": { "min": 25, "max": 35 },
+    "pot_possible": true,
+    "pot_description": "Tres adapte en pot.",
+    "light_after_transplant": "Soleil doux a plein soleil.",
+    "transplant_description": "Repiquer en motte puis pincer pour ramifier."
+  },
+  "growing": {
+    "exposure_type": ["Soleil doux", "Plein soleil"],
+    "heat_sensitive_above_c": 34,
+    "exposure_description": "Aime chaleur et lumiere, craint le froid.",
+    "watering_description": "Arrosage regulier sans detremper.",
+    "fertilization": {
+      "full_ground": "Compost leger.",
+      "pot": "Apport doux toutes les 2 a 3 semaines."
+    },
+    "support_needed": false,
+    "care_description": "Pincer regulierement pour retarder la floraison.",
+    "common_problems": {
+      "aphids": { "what_is_it": "Pucerons.", "why_it_happens": "Temps chaud/sec.", "solution": "Savon noir si besoin." },
+      "powdery_mildew": { "what_is_it": "Depot blanc.", "why_it_happens": "Humidite + manque d'air.", "solution": "Aerer et eviter mouillage foliaire." },
+      "yellow_leaves": { "what_is_it": "Feuilles jaunes.", "why_it_happens": "Exc es d'eau ou carence.", "solution": "Ajuster arrosage et nutrition." }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Levee.",
+    "week_3_4": "Eclaircissage.",
+    "week_5_6": "Repiquage.",
+    "week_7_8": "Ramification.",
+    "week_9_10": "Debut recoltes.",
+    "week_11_12": "Recoltes regulieres.",
+    "week_13_14": "Pincements.",
+    "week_15_16": "Production continue.",
+    "week_17_plus": "Fin de cycle."
+  },
+  "harvest": { "description": "Recolter au fur et a mesure." },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Apres brunissement des epis.",
+    "method": "Secher, battre et trier les graines.",
+    "seed_viability_years": 4
+  }
+},
+{
+  "id": 14,
+  "general": {
+    "name": "Yediveren",
+    "plant_name": "Piment",
+    "latin_name": "Capsicum annuum",
+    "type": "Legume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Moyen",
+    "height_cm": { "min": 50, "max": 100 },
+    "in_stock": true,
+    "sowing_month_indoor": [1, 2, 3, 4],
+    "sowing_month_outdoor": [4, 5],
+    "harvest_months": [7, 8, 9, 10],
+    "days_before_harvest_min": 90,
+    "days_before_harvest_max": 120,
+    "description": "Piment productif aimant une saison chaude."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 24, "max": 30 },
+    "duration_days": { "min": 8, "max": 20 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 3 },
+    "seeds_per_cell": 2,
+    "light_need": "Forte chaleur pour lever, lumiere intense ensuite.",
+    "step_by_step": "Semer chaud, garder humide sans exces."
+  },
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Apres gel et nuits > 12C.",
+    "spacing_between_plants_cm": { "min": 40, "max": 50 },
+    "row_spacing_cm": { "min": 50, "max": 70 },
+    "pot_possible": true,
+    "pot_description": "Pot 10 a 20 L bien drainant.",
+    "light_after_transplant": "Plein soleil.",
+    "transplant_description": "Repiquer en motte, arroser puis pailler."
+  },
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 36,
+    "exposure_description": "Aime chaleur durable et bonne lumiere.",
+    "watering_description": "Arrosage regulier, sans exces.",
+    "fertilization": {
+      "full_ground": "Compost + apport potassium en production.",
+      "pot": "Apport liquide regulier."
+    },
+    "support_needed": false,
+    "care_description": "Surveiller pucerons et pincer legerement si besoin.",
+    "common_problems": {
+      "aphids": { "what_is_it": "Pucerons.", "why_it_happens": "Temps doux.", "solution": "Savon noir dilue." },
+      "powdery_mildew": { "what_is_it": "Poudre blanche.", "why_it_happens": "Mauvaise aeration.", "solution": "Aerer et retirer parties atteintes." },
+      "yellow_leaves": { "what_is_it": "Jaunissement.", "why_it_happens": "Froid/eau excessive/carence.", "solution": "Corriger chaleur, eau et nutrition." }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Levee lente.",
+    "week_3_4": "Jeunes plants.",
+    "week_5_6": "Rempotage possible.",
+    "week_7_8": "Plantation.",
+    "week_9_10": "Croissance active.",
+    "week_11_12": "Floraison.",
+    "week_13_14": "Nouaison.",
+    "week_15_16": "Debut recoltes.",
+    "week_17_plus": "Production continue."
+  },
+  "harvest": { "description": "Recolter verts ou rouges selon maturite souhaitee." },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Sur fruits totalement murs.",
+    "method": "Extraire puis secher completement les graines.",
+    "seed_viability_years": 3
+  }
+},
+{
+  "id": 15,
+  "general": {
+    "name": "Habanero rouge des Caraibes",
+    "plant_name": "Piment",
+    "latin_name": "Capsicum chinense",
+    "type": "Legume fruit",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Difficile",
+    "height_cm": { "min": 60, "max": 120 },
+    "in_stock": true,
+    "sowing_month_indoor": [1, 2, 3],
+    "sowing_month_outdoor": [4, 5],
+    "harvest_months": [8, 9, 10],
+    "days_before_harvest_min": 110,
+    "days_before_harvest_max": 150,
+    "description": "Piment tres piquant demandant une longue saison chaude."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 26, "max": 32 },
+    "duration_days": { "min": 10, "max": 30 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 2, "max": 3 },
+    "seeds_per_cell": 2,
+    "light_need": "Forte chaleur pour lever, lumiere intense ensuite.",
+    "step_by_step": "Semer tres chaud, substrat leger, humidite reguliere."
+  },
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Apres tout risque de froid et nuits douces.",
+    "spacing_between_plants_cm": { "min": 45, "max": 60 },
+    "row_spacing_cm": { "min": 60, "max": 80 },
+    "pot_possible": true,
+    "pot_description": "Pot 15 a 25 L en situation chaude.",
+    "light_after_transplant": "Plein soleil.",
+    "transplant_description": "Repiquer avec motte intacte, maintenir chaleur."
+  },
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 38,
+    "exposure_description": "Aime chaleur continue.",
+    "watering_description": "Arrosage modere et regulier.",
+    "fertilization": {
+      "full_ground": "Apports progressifs riches en potassium.",
+      "pot": "Engrais liquide dose moderee."
+    },
+    "support_needed": false,
+    "care_description": "Culture lente au depart puis productive en pleine chaleur.",
+    "common_problems": {
+      "aphids": { "what_is_it": "Pucerons.", "why_it_happens": "Stress et croissance tendre.", "solution": "Savon noir et surveillance." },
+      "powdery_mildew": { "what_is_it": "Champignon blanc.", "why_it_happens": "Air confine.", "solution": "Aerer et eliminer les feuilles atteintes." },
+      "yellow_leaves": { "what_is_it": "Jaunissement et chute.", "why_it_happens": "Froid/eau excessive/carence.", "solution": "Stabiliser chaleur, eau et nutrition." }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Levee lente en forte chaleur.",
+    "week_3_4": "Debut croissance.",
+    "week_5_6": "Rempotage progressif.",
+    "week_7_8": "Installation definitive.",
+    "week_9_10": "Croissance vegetative.",
+    "week_11_12": "Floraison.",
+    "week_13_14": "Nouaison.",
+    "week_15_16": "Debut maturation.",
+    "week_17_plus": "Recoltes successives."
+  },
+  "harvest": {
+    "description": "Recolter fruits bien rouges avec precautions (tres piquant)."
+  },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Sur fruits totalement murs.",
+    "method": "Extraire et secher completement les graines.",
+    "seed_viability_years": 3
+  }
+},
+{
+  "id": 16,
+  "general": {
+    "name": "Cumin",
+    "plant_name": "Cumin",
+    "latin_name": "Cuminum cyminum",
+    "type": "Aromatique",
+    "life_cycle": "Annuelle",
+    "difficulty_level": "Moyen",
+    "height_cm": { "min": 20, "max": 50 },
+    "in_stock": true,
+    "sowing_month_indoor": [3, 4],
+    "sowing_month_outdoor": [4, 5, 6],
+    "harvest_months": [7, 8, 9],
+    "days_before_harvest_min": 100,
+    "days_before_harvest_max": 120,
+    "description": "Aromatique de climat chaud cultivee pour ses graines."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 18, "max": 24 },
+    "duration_days": { "min": 7, "max": 14 },
+    "depth_cm": { "min": 1, "max": 2 },
+    "spacing_between_seeds_cm": { "min": 5, "max": 10 },
+    "seeds_per_cell": 2,
+    "light_need": "Pas de lumiere necessaire avant levee.",
+    "step_by_step": "Semer peu profond en sol bien draine."
+  },
+  "transplant": {
+    "possible": false,
+    "possible_conditions": "Prefere semis direct.",
+    "spacing_between_plants_cm": { "min": 15, "max": 20 },
+    "row_spacing_cm": { "min": 25, "max": 35 },
+    "pot_possible": true,
+    "pot_description": "Possible en pot profond tres drainant.",
+    "light_after_transplant": "Non applicable en semis direct.",
+    "transplant_description": "Eviter le repiquage de la racine pivot."
+  },
+  "growing": {
+    "exposure_type": ["Plein soleil"],
+    "heat_sensitive_above_c": 38,
+    "exposure_description": "Aime chaleur seche et forte lumiere.",
+    "watering_description": "Arrosages moderes.",
+    "fertilization": {
+      "full_ground": "Compost modere avant semis.",
+      "pot": "Tres peu d'engrais."
+    },
+    "support_needed": false,
+    "care_description": "Desherber legerement et eviter humidite excessive.",
+    "common_problems": {
+      "aphids": { "what_is_it": "Pucerons.", "why_it_happens": "Temps doux/sec.", "solution": "Savon noir dilue." },
+      "powdery_mildew": { "what_is_it": "Feutrage blanc.", "why_it_happens": "Stress et manque d'air.", "solution": "Aerer et limiter humidite." },
+      "yellow_leaves": { "what_is_it": "Jaunissement precoce.", "why_it_happens": "Exc es d'eau.", "solution": "Ameliorer drainage." }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Levee.",
+    "week_3_4": "Installation vegetative.",
+    "week_5_6": "Croissance reguliere.",
+    "week_7_8": "Debut floraison.",
+    "week_9_10": "Formation des graines.",
+    "week_11_12": "Remplissage des ombelles.",
+    "week_13_14": "Maturation.",
+    "week_15_16": "Recolte possible.",
+    "week_17_plus": "Fin de cycle."
+  },
+  "harvest": {
+    "description": "Couper les ombelles brunes, secher puis battre les graines."
+  },
+  "seed_saving": {
+    "possible": true,
+    "timing": "A maturite complete des ombelles.",
+    "method": "Sechage, battage et tri des graines.",
+    "seed_viability_years": 3
+  }
+},
+{
+  "id": 17,
+  "general": {
+    "name": "Cataire (herbe aux chats)",
+    "plant_name": "Cataire",
+    "latin_name": "Nepeta cataria",
+    "type": "Aromatique",
+    "life_cycle": "Vivace",
+    "difficulty_level": "Facile",
+    "height_cm": { "min": 40, "max": 100 },
+    "in_stock": true,
+    "sowing_month_indoor": [2, 3, 4],
+    "sowing_month_outdoor": [4, 5, 6, 9],
+    "harvest_months": [6, 7, 8, 9],
+    "days_before_harvest_min": 70,
+    "days_before_harvest_max": 100,
+    "description": "Aromatique rustique et mellifere, appreciee des chats."
+  },
+  "germination": {
+    "ideal_temp_c": { "min": 18, "max": 24 },
+    "duration_days": { "min": 7, "max": 14 },
+    "depth_cm": { "min": 0, "max": 1 },
+    "spacing_between_seeds_cm": { "min": 3, "max": 5 },
+    "seeds_per_cell": 2,
+    "light_need": "Semis legerement couverts puis forte lumiere.",
+    "step_by_step": "Semer en surface, maintenir humide puis eclaircir."
+  },
+  "transplant": {
+    "possible": true,
+    "possible_conditions": "Au printemps ou debut automne.",
+    "spacing_between_plants_cm": { "min": 35, "max": 50 },
+    "row_spacing_cm": { "min": 40, "max": 60 },
+    "pot_possible": true,
+    "pot_description": "Pot 7 a 15 L, substrat drainant.",
+    "light_after_transplant": "Soleil doux a plein soleil.",
+    "transplant_description": "Arroser a la plantation puis espacer les arrosages."
+  },
+  "growing": {
+    "exposure_type": ["Soleil doux", "Plein soleil"],
+    "heat_sensitive_above_c": 36,
+    "exposure_description": "Prefere un emplacement lumineux et bien draine.",
+    "watering_description": "Arrosage modere, supporte un leger sec.",
+    "fertilization": {
+      "full_ground": "Peu gourmande, compost leger au printemps.",
+      "pot": "Apport leger printemps/ete."
+    },
+    "support_needed": false,
+    "care_description": "Tailler apres floraison pour relancer la plante.",
+    "common_problems": {
+      "aphids": { "what_is_it": "Pucerons occasionnels.", "why_it_happens": "Croissance tendre.", "solution": "Douche legere ou savon noir." },
+      "powdery_mildew": { "what_is_it": "Feutrage blanc.", "why_it_happens": "Air confine.", "solution": "Aerer et tailler." },
+      "yellow_leaves": { "what_is_it": "Jaunissement diffus.", "why_it_happens": "Drainage faible/exces d'eau.", "solution": "Ameliorer drainage." }
+    }
+  },
+  "timeline_culture": {
+    "week_1_2": "Levee.",
+    "week_3_4": "Jeunes plants.",
+    "week_5_6": "Repiquage.",
+    "week_7_8": "Installation.",
+    "week_9_10": "Debut floraison possible.",
+    "week_11_12": "Recolte de feuilles.",
+    "week_13_14": "Taille de relance.",
+    "week_15_16": "Nouvelle pousse.",
+    "week_17_plus": "Entretien vivace."
+  },
+  "harvest": {
+    "description": "Recolter feuilles et sommites en periode active."
+  },
+  "seed_saving": {
+    "possible": true,
+    "timing": "Quand les epis brunissent.",
+    "method": "Couper, secher puis battre les epis.",
+    "seed_viability_years": 3
+  }
 }
 
 ]

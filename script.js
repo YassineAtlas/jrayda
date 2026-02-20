@@ -42,6 +42,7 @@ function displayPlantList(plants) {
 
       <p><strong>Difficulté :</strong> ${plant.general.difficulty_level}</p>
       <p><strong>Type :</strong> ${plant.general.type}</p>
+      <p><strong>Germination idéale :</strong> ${plant.germination.ideal_temp_c.min}-${plant.germination.ideal_temp_c.max} &deg;C</p>
       <p><strong>En stock :</strong> ${plant.general.in_stock ? "Oui" : "Non"}</p>
 
       <a href="plant.html?id=${plant.id}">Voir fiche</a>
