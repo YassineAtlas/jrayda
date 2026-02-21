@@ -4,6 +4,8 @@ const tabSheetBtn = document.getElementById("tab-sheet");
 const tabSemisBtn = document.getElementById("tab-semis");
 
 let plantSemisLoaded = false;
+let photoLightbox = null;
+let photoLightboxImage = null;
 
 function getPlantIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
@@ -39,6 +41,63 @@ function formatDate(value) {
     return "-";
   }
   return new Date(`${value}T00:00:00`).toLocaleDateString("fr-FR");
+}
+
+function ensurePhotoLightbox() {
+  if (photoLightbox && photoLightboxImage) {
+    return;
+  }
+
+  const lightbox = document.createElement("div");
+  lightbox.id = "photo-lightbox";
+  lightbox.className = "photo-lightbox";
+  lightbox.hidden = true;
+  lightbox.innerHTML = `
+    <button type="button" class="photo-lightbox-close" aria-label="Fermer l'image">Fermer</button>
+    <img class="photo-lightbox-image" alt="">
+  `;
+  document.body.appendChild(lightbox);
+
+  const image = lightbox.querySelector(".photo-lightbox-image");
+  const closeBtn = lightbox.querySelector(".photo-lightbox-close");
+
+  const close = () => {
+    if (!photoLightbox) {
+      return;
+    }
+    photoLightbox.hidden = true;
+    if (photoLightboxImage) {
+      photoLightboxImage.removeAttribute("src");
+      photoLightboxImage.alt = "";
+    }
+    document.body.classList.remove("lightbox-open");
+  };
+
+  closeBtn.addEventListener("click", close);
+  lightbox.addEventListener("click", (event) => {
+    if (event.target === lightbox) {
+      close();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && photoLightbox && !photoLightbox.hidden) {
+      close();
+    }
+  });
+
+  photoLightbox = lightbox;
+  photoLightboxImage = image;
+}
+
+function openPhotoLightbox(src, altText = "Photo") {
+  if (!src) {
+    return;
+  }
+  ensurePhotoLightbox();
+  photoLightboxImage.src = src;
+  photoLightboxImage.alt = altText;
+  photoLightbox.hidden = false;
+  document.body.classList.add("lightbox-open");
 }
 
 function renderSemisTabIntro({ plantId, showAddButton }) {
@@ -198,6 +257,8 @@ function initTabs() {
     return;
   }
 
+  ensurePhotoLightbox();
+
   const openSemisByDefault = shouldOpenSemisTabByDefault();
 
   if (openSemisByDefault) {
@@ -209,6 +270,14 @@ function initTabs() {
   tabSheetBtn.addEventListener("click", showSheetTab);
   tabSemisBtn.addEventListener("click", async () => {
     await openSemisTab();
+  });
+
+  plantSemisContainer.addEventListener("click", (event) => {
+    const clickedImage = event.target.closest("img.seed-photo");
+    if (!clickedImage) {
+      return;
+    }
+    openPhotoLightbox(clickedImage.currentSrc || clickedImage.src, clickedImage.alt || "Photo semis");
   });
 }
 

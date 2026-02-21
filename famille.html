@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Espace famille</title>
-  <link rel="stylesheet" href="style.css?v=20260221-10">
+  <link rel="stylesheet" href="style.css?v=20260221-12">
 </head>
 <body>
   <header class="site-header">
@@ -72,10 +72,19 @@
 
           <label for="seed-photo-camera" class="camera-trigger mobile-camera-only">Prendre une photo</label>
           <input type="file" id="seed-photo-camera" class="camera-input-hidden mobile-camera-only" accept="image/*" capture="environment">
+          <p id="seed-photo-selected" class="file-selection-indicator">Aucune photo selectionnee.</p>
 
           <button type="submit" id="save-btn">Ajouter le semis</button>
           <button type="button" id="cancel-edit-btn" class="secondary hidden" hidden>Annuler la modification</button>
         </form>
+
+        <div id="seed-progress" class="seed-progress hidden" hidden aria-live="polite">
+          <div class="seed-progress-head">
+            <span id="seed-progress-label">Enregistrement...</span>
+            <span id="seed-progress-percent">0%</span>
+          </div>
+          <progress id="seed-progress-bar" max="100" value="0">0%</progress>
+        </div>
 
         <p id="seed-message" class="status-message"></p>
         <div id="seed-list" class="seed-list"></div>
@@ -101,6 +110,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=20260221-6"></script>
-  <script src="famille.js?v=20260221-9"></script>
+  <script src="famille.js?v=20260221-11"></script>
 </body>
 </html>

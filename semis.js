@@ -10,6 +10,11 @@ const updateWeekInput = document.getElementById("update-week");
 const updateNoteInput = document.getElementById("update-note");
 const updatePhotoInput = document.getElementById("update-photo");
 const updatePhotoCameraInput = document.getElementById("update-photo-camera");
+const updatePhotoSelected = document.getElementById("update-photo-selected");
+const updateProgress = document.getElementById("update-progress");
+const updateProgressBar = document.getElementById("update-progress-bar");
+const updateProgressLabel = document.getElementById("update-progress-label");
+const updateProgressPercent = document.getElementById("update-progress-percent");
 const updateMessage = document.getElementById("update-message");
 const updatesList = document.getElementById("updates-list");
 
@@ -19,6 +24,10 @@ let semisId = "";
 let semisRecord = null;
 let isOwner = false;
 let updatesCache = [];
+let isSavingUpdate = false;
+let updateProgressHideTimer = null;
+let photoLightbox = null;
+let photoLightboxImage = null;
 
 function setMessage(element, text, type = "") {
   element.textContent = text || "";
@@ -83,6 +92,148 @@ function getFirstSelectedFile(inputs) {
     }
   }
   return null;
+}
+
+function clearUpdateProgressHideTimer() {
+  if (updateProgressHideTimer === null) {
+    return;
+  }
+  window.clearTimeout(updateProgressHideTimer);
+  updateProgressHideTimer = null;
+}
+
+function setUpdatePhotoSelectedText(text, isSelected = false) {
+  if (!updatePhotoSelected) {
+    return;
+  }
+  updatePhotoSelected.textContent = text;
+  updatePhotoSelected.classList.toggle("selected", isSelected);
+}
+
+function updatePhotoSelectionText() {
+  const file = getFirstSelectedFile([updatePhotoCameraInput, updatePhotoInput]);
+  if (!file) {
+    setUpdatePhotoSelectedText("Aucune photo selectionnee.");
+    return;
+  }
+
+  const fromCamera = Boolean(updatePhotoCameraInput?.files?.[0]);
+  const sourceLabel = fromCamera ? "camera" : "fichier";
+  const fileName = file.name || "image.jpg";
+  setUpdatePhotoSelectedText(`Photo ${sourceLabel}: ${fileName}`, true);
+}
+
+function setUpdateFormSavingState(isSaving) {
+  updateModeInput.disabled = isSaving;
+  updateDateInput.disabled = isSaving;
+  updateWeekInput.disabled = isSaving;
+  updateNoteInput.disabled = isSaving;
+  updatePhotoInput.disabled = isSaving;
+  updatePhotoCameraInput.disabled = isSaving;
+  const submitBtn = updateForm.querySelector("button[type='submit']");
+  if (submitBtn) {
+    submitBtn.disabled = isSaving;
+  }
+}
+
+function setUpdateProgress(value, label = "") {
+  const safeValue = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+  if (updateProgressBar) {
+    updateProgressBar.value = safeValue;
+  }
+  if (updateProgressPercent) {
+    updateProgressPercent.textContent = `${safeValue}%`;
+  }
+  if (label && updateProgressLabel) {
+    updateProgressLabel.textContent = label;
+  }
+}
+
+function showUpdateProgress(label = "Enregistrement du suivi...", value = 0) {
+  if (!updateProgress) {
+    return;
+  }
+  clearUpdateProgressHideTimer();
+  updateProgress.classList.remove("hidden");
+  updateProgress.hidden = false;
+  setUpdateProgress(value, label);
+}
+
+function hideUpdateProgress(delayMs = 0) {
+  if (!updateProgress) {
+    return;
+  }
+
+  clearUpdateProgressHideTimer();
+
+  const hideNow = () => {
+    setUpdateProgress(0, "Enregistrement du suivi...");
+    updateProgress.classList.add("hidden");
+    updateProgress.hidden = true;
+  };
+
+  if (delayMs > 0) {
+    updateProgressHideTimer = window.setTimeout(hideNow, delayMs);
+    return;
+  }
+  hideNow();
+}
+
+function ensurePhotoLightbox() {
+  if (photoLightbox && photoLightboxImage) {
+    return;
+  }
+
+  const lightbox = document.createElement("div");
+  lightbox.id = "photo-lightbox";
+  lightbox.className = "photo-lightbox";
+  lightbox.hidden = true;
+  lightbox.innerHTML = `
+    <button type="button" class="photo-lightbox-close" aria-label="Fermer l'image">Fermer</button>
+    <img class="photo-lightbox-image" alt="">
+  `;
+  document.body.appendChild(lightbox);
+
+  const image = lightbox.querySelector(".photo-lightbox-image");
+  const closeBtn = lightbox.querySelector(".photo-lightbox-close");
+
+  const close = () => {
+    if (!photoLightbox) {
+      return;
+    }
+    photoLightbox.hidden = true;
+    if (photoLightboxImage) {
+      photoLightboxImage.removeAttribute("src");
+      photoLightboxImage.alt = "";
+    }
+    document.body.classList.remove("lightbox-open");
+  };
+
+  closeBtn.addEventListener("click", close);
+  lightbox.addEventListener("click", (event) => {
+    if (event.target === lightbox) {
+      close();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && photoLightbox && !photoLightbox.hidden) {
+      close();
+    }
+  });
+
+  photoLightbox = lightbox;
+  photoLightboxImage = image;
+}
+
+function openPhotoLightbox(src, altText = "Photo") {
+  if (!src) {
+    return;
+  }
+  ensurePhotoLightbox();
+  photoLightboxImage.src = src;
+  photoLightboxImage.alt = altText;
+  photoLightbox.hidden = false;
+  document.body.classList.add("lightbox-open");
 }
 
 async function getSignedPhotoUrl(path) {
@@ -225,6 +376,7 @@ async function loadSemis() {
     updateDateInput.max = getTodayIsoDate();
     updateWeekInput.value = String(semisRecord.current_week || 1);
     applyUpdateModeFields();
+    updatePhotoSelectionText();
   } else {
     hideOwnerUpdateForm();
   }
@@ -322,6 +474,10 @@ async function deletePhoto(path) {
 async function handleUpdateSubmit(event) {
   event.preventDefault();
 
+  if (isSavingUpdate) {
+    return;
+  }
+
   if (!isOwner || !semisRecord) {
     setMessage(updateMessage, "Action non autorisee.", "error");
     return;
@@ -341,47 +497,70 @@ async function handleUpdateSubmit(event) {
     return;
   }
 
+  isSavingUpdate = true;
+  setUpdateFormSavingState(true);
   setMessage(updateMessage, "Enregistrement du suivi...");
-  const uploadedPhotoPath = await uploadUpdatePhotoIfNeeded();
-  if (uploadedPhotoPath === false) {
-    return;
-  }
+  showUpdateProgress("Preparation...", 8);
 
-  const { error } = await supabaseClient.from("semis_updates").insert({
-    semis_id: semisId,
-    user_id: currentUser.id,
-    week_number: resolved.weekNumber,
-    event_date: resolved.eventDate,
-    note: note || null,
-    photo_path: uploadedPhotoPath
-  });
+  let submitSucceeded = false;
 
-  if (error) {
-    setMessage(updateMessage, `Erreur ajout suivi: ${error.message}`, "error");
-    return;
-  }
+  try {
+    setUpdateProgress(30, hasPhoto ? "Upload de la photo..." : "Validation des donnees...");
+    const uploadedPhotoPath = await uploadUpdatePhotoIfNeeded();
+    if (uploadedPhotoPath === false) {
+      return;
+    }
 
-  if ((semisRecord.current_week || 1) !== resolved.weekNumber) {
-    const { error: updateSemisError } = await supabaseClient
-      .from("semis")
-      .update({ current_week: resolved.weekNumber })
-      .eq("id", semisId)
-      .eq("user_id", currentUser.id);
+    setUpdateProgress(58, "Enregistrement du suivi...");
+    const { error } = await supabaseClient.from("semis_updates").insert({
+      semis_id: semisId,
+      user_id: currentUser.id,
+      week_number: resolved.weekNumber,
+      event_date: resolved.eventDate,
+      note: note || null,
+      photo_path: uploadedPhotoPath
+    });
 
-    if (!updateSemisError) {
-      semisRecord.current_week = resolved.weekNumber;
-      await renderSemisDetail();
+    if (error) {
+      setMessage(updateMessage, `Erreur ajout suivi: ${error.message}`, "error");
+      return;
+    }
+
+    if ((semisRecord.current_week || 1) !== resolved.weekNumber) {
+      setUpdateProgress(76, "Mise a jour de la semaine...");
+      const { error: updateSemisError } = await supabaseClient
+        .from("semis")
+        .update({ current_week: resolved.weekNumber })
+        .eq("id", semisId)
+        .eq("user_id", currentUser.id);
+
+      if (!updateSemisError) {
+        semisRecord.current_week = resolved.weekNumber;
+        await renderSemisDetail();
+      }
+    }
+
+    updateForm.reset();
+    updateModeInput.value = "current_date";
+    updateDateInput.value = getTodayIsoDate();
+    updateWeekInput.value = String(semisRecord.current_week || resolved.weekNumber);
+    applyUpdateModeFields();
+    updatePhotoSelectionText();
+
+    setUpdateProgress(90, "Actualisation du suivi...");
+    await loadUpdates();
+    setUpdateProgress(100, "Suivi enregistre.");
+    setMessage(updateMessage, "Suivi ajoute.", "success");
+    submitSucceeded = true;
+  } finally {
+    isSavingUpdate = false;
+    setUpdateFormSavingState(false);
+    if (submitSucceeded) {
+      hideUpdateProgress(900);
+    } else {
+      hideUpdateProgress();
     }
   }
-
-  updateForm.reset();
-  updateModeInput.value = "current_date";
-  updateDateInput.value = getTodayIsoDate();
-  updateWeekInput.value = String(semisRecord.current_week || resolved.weekNumber);
-  applyUpdateModeFields();
-
-  setMessage(updateMessage, "Suivi ajoute.", "success");
-  await loadUpdates();
 }
 
 function getUpdateById(updateId) {
@@ -432,16 +611,35 @@ function attachEvents() {
       if (updatePhotoInput.files[0]) {
         updatePhotoCameraInput.value = "";
       }
+      updatePhotoSelectionText();
     });
 
     updatePhotoCameraInput.addEventListener("change", () => {
       if (updatePhotoCameraInput.files[0]) {
         updatePhotoInput.value = "";
       }
+      updatePhotoSelectionText();
     });
   }
 
+  updatePhotoSelectionText();
+  ensurePhotoLightbox();
+
+  semisDetail.addEventListener("click", (event) => {
+    const clickedImage = event.target.closest("img.seed-photo");
+    if (!clickedImage) {
+      return;
+    }
+    openPhotoLightbox(clickedImage.currentSrc || clickedImage.src, clickedImage.alt || "Photo semis");
+  });
+
   updatesList.addEventListener("click", async (event) => {
+    const clickedImage = event.target.closest("img.seed-photo");
+    if (clickedImage) {
+      openPhotoLightbox(clickedImage.currentSrc || clickedImage.src, clickedImage.alt || "Photo suivi");
+      return;
+    }
+
     const button = event.target.closest("button[data-action='delete-update']");
     if (!button) {
       return;

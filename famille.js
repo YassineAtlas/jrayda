@@ -28,6 +28,11 @@ const currentWeekInput = document.getElementById("current-week");
 const seedLocationInput = document.getElementById("seed-location");
 const seedPhotoInput = document.getElementById("seed-photo");
 const seedPhotoCameraInput = document.getElementById("seed-photo-camera");
+const seedPhotoSelected = document.getElementById("seed-photo-selected");
+const seedProgress = document.getElementById("seed-progress");
+const seedProgressBar = document.getElementById("seed-progress-bar");
+const seedProgressLabel = document.getElementById("seed-progress-label");
+const seedProgressPercent = document.getElementById("seed-progress-percent");
 const saveBtn = document.getElementById("save-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const seedList = document.getElementById("seed-list");
@@ -37,6 +42,10 @@ let currentUser = null;
 let seedCache = [];
 let plantCatalog = [];
 let prefillPlantId = "";
+let isSavingSeed = false;
+let seedProgressHideTimer = null;
+let photoLightbox = null;
+let photoLightboxImage = null;
 
 function setMessage(element, text, type = "") {
   element.textContent = text || "";
@@ -96,6 +105,147 @@ function getFirstSelectedFile(inputs) {
     }
   }
   return null;
+}
+
+function clearSeedProgressHideTimer() {
+  if (seedProgressHideTimer === null) {
+    return;
+  }
+  window.clearTimeout(seedProgressHideTimer);
+  seedProgressHideTimer = null;
+}
+
+function setSeedPhotoSelectedText(text, isSelected = false) {
+  if (!seedPhotoSelected) {
+    return;
+  }
+  seedPhotoSelected.textContent = text;
+  seedPhotoSelected.classList.toggle("selected", isSelected);
+}
+
+function updateSeedPhotoSelectedText() {
+  const file = getFirstSelectedFile([seedPhotoCameraInput, seedPhotoInput]);
+  if (!file) {
+    setSeedPhotoSelectedText("Aucune photo selectionnee.");
+    return;
+  }
+
+  const fromCamera = Boolean(seedPhotoCameraInput?.files?.[0]);
+  const sourceLabel = fromCamera ? "camera" : "fichier";
+  const fileName = file.name || "image.jpg";
+  setSeedPhotoSelectedText(`Photo ${sourceLabel}: ${fileName}`, true);
+}
+
+function setSeedFormSavingState(isSaving) {
+  saveBtn.disabled = isSaving;
+  cancelEditBtn.disabled = isSaving;
+  plantSelectInput.disabled = isSaving;
+  seedDateInput.disabled = isSaving;
+  currentWeekInput.disabled = isSaving;
+  seedLocationInput.disabled = isSaving;
+  seedPhotoInput.disabled = isSaving;
+  seedPhotoCameraInput.disabled = isSaving;
+}
+
+function setSeedProgress(value, label = "") {
+  const safeValue = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+
+  if (seedProgressBar) {
+    seedProgressBar.value = safeValue;
+  }
+  if (seedProgressPercent) {
+    seedProgressPercent.textContent = `${safeValue}%`;
+  }
+  if (label && seedProgressLabel) {
+    seedProgressLabel.textContent = label;
+  }
+}
+
+function showSeedProgress(label = "Enregistrement...", value = 0) {
+  if (!seedProgress) {
+    return;
+  }
+  clearSeedProgressHideTimer();
+  seedProgress.classList.remove("hidden");
+  seedProgress.hidden = false;
+  setSeedProgress(value, label);
+}
+
+function hideSeedProgress(delayMs = 0) {
+  if (!seedProgress) {
+    return;
+  }
+
+  clearSeedProgressHideTimer();
+
+  const hideNow = () => {
+    setSeedProgress(0, "Enregistrement...");
+    seedProgress.classList.add("hidden");
+    seedProgress.hidden = true;
+  };
+
+  if (delayMs > 0) {
+    seedProgressHideTimer = window.setTimeout(hideNow, delayMs);
+    return;
+  }
+  hideNow();
+}
+
+function ensurePhotoLightbox() {
+  if (photoLightbox && photoLightboxImage) {
+    return;
+  }
+
+  const lightbox = document.createElement("div");
+  lightbox.id = "photo-lightbox";
+  lightbox.className = "photo-lightbox";
+  lightbox.hidden = true;
+  lightbox.innerHTML = `
+    <button type="button" class="photo-lightbox-close" aria-label="Fermer l'image">Fermer</button>
+    <img class="photo-lightbox-image" alt="">
+  `;
+  document.body.appendChild(lightbox);
+
+  const image = lightbox.querySelector(".photo-lightbox-image");
+  const closeBtn = lightbox.querySelector(".photo-lightbox-close");
+
+  const close = () => {
+    if (!photoLightbox) {
+      return;
+    }
+    photoLightbox.hidden = true;
+    if (photoLightboxImage) {
+      photoLightboxImage.removeAttribute("src");
+      photoLightboxImage.alt = "";
+    }
+    document.body.classList.remove("lightbox-open");
+  };
+
+  closeBtn.addEventListener("click", close);
+  lightbox.addEventListener("click", (event) => {
+    if (event.target === lightbox) {
+      close();
+    }
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && photoLightbox && !photoLightbox.hidden) {
+      close();
+    }
+  });
+
+  photoLightbox = lightbox;
+  photoLightboxImage = image;
+}
+
+function openPhotoLightbox(src, altText = "Photo") {
+  if (!src) {
+    return;
+  }
+  ensurePhotoLightbox();
+  photoLightboxImage.src = src;
+  photoLightboxImage.alt = altText;
+  photoLightbox.hidden = false;
+  document.body.classList.add("lightbox-open");
 }
 
 function calculateCurrentWeek(sowingDate) {
@@ -161,6 +311,7 @@ function resetSeedForm() {
   cancelEditBtn.classList.add("hidden");
   cancelEditBtn.hidden = true;
   currentWeekInput.value = "1";
+  updateSeedPhotoSelectedText();
   if (prefillPlantId) {
     plantSelectInput.value = prefillPlantId;
   }
@@ -261,8 +412,12 @@ async function renderSeeds(seeds) {
     .join("");
 }
 
-async function loadSeeds() {
-  setMessage(seedMessage, "Chargement des semis...");
+async function loadSeeds(options = {}) {
+  const silentStatus = Boolean(options.silentStatus);
+  if (!silentStatus) {
+    setMessage(seedMessage, "Chargement des semis...");
+  }
+
   const { data, error } = await supabaseClient
     .from("semis")
     .select("id, user_id, owner_email, plant_id, plant_name, sowing_date, current_week, location, photo_path, created_at")
@@ -270,12 +425,15 @@ async function loadSeeds() {
 
   if (error) {
     setMessage(seedMessage, `Erreur: ${error.message}`, "error");
-    return;
+    return false;
   }
 
   seedCache = data || [];
   await renderSeeds(seedCache);
-  setMessage(seedMessage, `${seedCache.length} semis visible(s).`, "success");
+  if (!silentStatus) {
+    setMessage(seedMessage, `${seedCache.length} semis visible(s).`, "success");
+  }
+  return true;
 }
 
 async function isFamilyMember(email) {
@@ -386,6 +544,13 @@ function startEdit(seed) {
   saveBtn.textContent = "Enregistrer la modification";
   cancelEditBtn.classList.remove("hidden");
   cancelEditBtn.hidden = false;
+  if (seed.photo_path) {
+    setSeedPhotoSelectedText(
+      "Photo actuelle conservee. Ajoute une nouvelle photo pour la remplacer."
+    );
+  } else {
+    updateSeedPhotoSelectedText();
+  }
   setMessage(seedMessage, "Mode modification actif.");
 }
 
@@ -435,6 +600,10 @@ async function handleDelete(seed) {
 async function handleSeedSubmit(event) {
   event.preventDefault();
 
+  if (isSavingSeed) {
+    return;
+  }
+
   if (!currentUser) {
     setMessage(seedMessage, "Connexion requise.", "error");
     return;
@@ -465,56 +634,84 @@ async function handleSeedSubmit(event) {
     return;
   }
 
+  isSavingSeed = true;
+  setSeedFormSavingState(true);
   setMessage(seedMessage, "Enregistrement...");
+  showSeedProgress("Preparation...", 8);
 
-  let photoPath = existingSeed?.photo_path || null;
-  const uploadedPhotoPath = await uploadPhotoIfNeeded([seedPhotoCameraInput, seedPhotoInput]);
-  if (uploadedPhotoPath === false) {
-    return;
-  }
-  if (uploadedPhotoPath) {
-    photoPath = uploadedPhotoPath;
-  }
+  let submitSucceeded = false;
 
-  const payload = {
-    plant_id: plantId,
-    plant_name: plantName,
-    sowing_date: sowingDate,
-    current_week: isEdit ? Number(existingSeed.current_week) || 1 : calculatedCurrentWeek,
-    location,
-    photo_path: photoPath
-  };
+  try {
+    let photoPath = existingSeed?.photo_path || null;
+    const hasNewPhoto = Boolean(getFirstSelectedFile([seedPhotoCameraInput, seedPhotoInput]));
+    setSeedProgress(28, hasNewPhoto ? "Upload de la photo..." : "Validation des donnees...");
 
-  if (isEdit) {
-    const { error } = await supabaseClient
-      .from("semis")
-      .update(payload)
-      .eq("id", seedId)
-      .eq("user_id", currentUser.id);
+    const uploadedPhotoPath = await uploadPhotoIfNeeded([seedPhotoCameraInput, seedPhotoInput]);
+    if (uploadedPhotoPath === false) {
+      return;
+    }
+    if (uploadedPhotoPath) {
+      photoPath = uploadedPhotoPath;
+    }
 
-    if (error) {
-      setMessage(seedMessage, `Erreur modification: ${error.message}`, "error");
+    const payload = {
+      plant_id: plantId,
+      plant_name: plantName,
+      sowing_date: sowingDate,
+      current_week: isEdit ? Number(existingSeed.current_week) || 1 : calculatedCurrentWeek,
+      location,
+      photo_path: photoPath
+    };
+
+    setSeedProgress(62, isEdit ? "Mise a jour du semis..." : "Creation du semis...");
+
+    if (isEdit) {
+      const { error } = await supabaseClient
+        .from("semis")
+        .update(payload)
+        .eq("id", seedId)
+        .eq("user_id", currentUser.id);
+
+      if (error) {
+        setMessage(seedMessage, `Erreur modification: ${error.message}`, "error");
+        return;
+      }
+
+      if (uploadedPhotoPath && existingSeed.photo_path && existingSeed.photo_path !== uploadedPhotoPath) {
+        await deletePhotoIfExists(existingSeed.photo_path);
+      }
+    } else {
+      const { error } = await supabaseClient.from("semis").insert({
+        ...payload,
+        user_id: currentUser.id,
+        owner_email: normalizeText(currentUser.email)
+      });
+
+      if (error) {
+        setMessage(seedMessage, `Erreur creation: ${error.message}`, "error");
+        return;
+      }
+    }
+
+    setSeedProgress(86, "Actualisation de la liste...");
+    const loaded = await loadSeeds({ silentStatus: true });
+    if (!loaded) {
       return;
     }
 
-    if (uploadedPhotoPath && existingSeed.photo_path && existingSeed.photo_path !== uploadedPhotoPath) {
-      await deletePhotoIfExists(existingSeed.photo_path);
-    }
-  } else {
-    const { error } = await supabaseClient.from("semis").insert({
-      ...payload,
-      user_id: currentUser.id,
-      owner_email: normalizeText(currentUser.email)
-    });
-
-    if (error) {
-      setMessage(seedMessage, `Erreur creation: ${error.message}`, "error");
-      return;
+    resetSeedForm();
+    setSeedProgress(100, "Semis enregistre.");
+    setMessage(seedMessage, isEdit ? "Semis modifie." : "Semis ajoute.", "success");
+    submitSucceeded = true;
+  } finally {
+    isSavingSeed = false;
+    setSeedFormSavingState(false);
+    if (submitSucceeded) {
+      hideSeedProgress(900);
+    } else {
+      hideSeedProgress();
     }
   }
-
-  resetSeedForm();
-  await loadSeeds();
 }
 
 async function handlePasswordLogin(event) {
@@ -633,16 +830,27 @@ function attachEvents() {
       if (seedPhotoInput.files[0]) {
         seedPhotoCameraInput.value = "";
       }
+      updateSeedPhotoSelectedText();
     });
 
     seedPhotoCameraInput.addEventListener("change", () => {
       if (seedPhotoCameraInput.files[0]) {
         seedPhotoInput.value = "";
       }
+      updateSeedPhotoSelectedText();
     });
   }
 
+  updateSeedPhotoSelectedText();
+  ensurePhotoLightbox();
+
   seedList.addEventListener("click", async (event) => {
+    const clickedImage = event.target.closest("img.seed-photo");
+    if (clickedImage) {
+      openPhotoLightbox(clickedImage.currentSrc || clickedImage.src, clickedImage.alt || "Photo semis");
+      return;
+    }
+
     const button = event.target.closest("button[data-action]");
     if (!button) {
       return;
