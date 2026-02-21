@@ -144,6 +144,38 @@ p {
   color: #2d5a2d;
 }
 
+.site-nav {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.site-nav h1 {
+  margin: 0;
+}
+
+.family-link {
+  display: inline-block;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid #6b9e6b;
+  color: #2d5a2d;
+  font-weight: 600;
+}
+
+.family-link:hover {
+  background: #e8efe6;
+}
+
+.family-link-active {
+  background: #6b9e6b;
+  color: #ffffff;
+}
+
 /* Card image */
 
 .card-image {
@@ -169,6 +201,154 @@ p {
 
 @media (max-width: 640px) {
   #plant-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Family page */
+
+.family-container {
+  max-width: 900px;
+  margin: 20px auto 40px;
+  padding: 0 20px;
+}
+
+.panel {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e1ebe0;
+  padding: 24px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.panel form {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.panel input,
+.panel button {
+  font: inherit;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.panel input {
+  border: 1px solid #cdd9ca;
+}
+
+.panel button {
+  border: none;
+  background: #6b9e6b;
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.panel button:hover {
+  background: #4f7c4f;
+}
+
+.panel button.secondary {
+  background: #dde7d7;
+  color: #2f3e2f;
+}
+
+.panel button.secondary:hover {
+  background: #cdd9ca;
+}
+
+.status-message {
+  min-height: 22px;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.status-message.error {
+  color: #8e2f2f;
+}
+
+.status-message.success {
+  color: #2d5a2d;
+}
+
+.member-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.member-header h2 {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.member-header button {
+  width: auto;
+  padding: 8px 12px;
+}
+
+.seed-form {
+  margin-top: 20px;
+  border-top: 1px solid #e1ebe0;
+  padding-top: 16px;
+}
+
+.seed-list {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.seed-card {
+  border: 1px solid #e1ebe0;
+  border-radius: 12px;
+  padding: 14px;
+  background: #f9fbf8;
+}
+
+.seed-card h3 {
+  margin: 0 0 8px;
+}
+
+.seed-photo {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.seed-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.seed-card-actions button {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .member-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .seed-list {
     grid-template-columns: 1fr;
   }
 }
