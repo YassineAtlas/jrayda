@@ -198,16 +198,18 @@ function initTabs() {
     return;
   }
 
-  showSheetTab();
+  const openSemisByDefault = shouldOpenSemisTabByDefault();
+
+  if (openSemisByDefault) {
+    openSemisTab();
+  } else {
+    showSheetTab();
+  }
 
   tabSheetBtn.addEventListener("click", showSheetTab);
   tabSemisBtn.addEventListener("click", async () => {
     await openSemisTab();
   });
-
-  if (shouldOpenSemisTabByDefault()) {
-    openSemisTab();
-  }
 }
 
 initTabs();
