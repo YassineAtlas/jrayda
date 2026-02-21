@@ -42,7 +42,7 @@ Commit/push puis laisse GitHub Pages redeployer.
 
 1. Ouvre `famille.html`.
 2. Premiere fois: utilise `Recevoir un lien par email`.
-3. Une fois connecte, cree ton mot de passe dans la section `Mot de passe du compte`.
+3. Une fois connecte, clique `Changer le mot de passe`, enregistre ton mot de passe, puis reviens aux semis.
 4. Ensuite, connecte-toi avec `email + mot de passe` (sans lien email).
 5. Ajoute/modifie/supprime tes semis.
 

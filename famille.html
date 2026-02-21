@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Espace famille</title>
-  <link rel="stylesheet" href="style.css?v=20260221-2">
+  <link rel="stylesheet" href="style.css?v=20260221-3">
 </head>
 <body>
   <header class="site-header">
@@ -43,48 +43,56 @@
     <section class="panel hidden" id="member-panel" hidden>
       <div class="member-header">
         <h2>Mes semis</h2>
-        <button id="logout-btn" type="button">Se deconnecter</button>
+        <div class="member-actions">
+          <button id="open-password-btn" type="button" class="secondary">Changer le mot de passe</button>
+          <button id="logout-btn" type="button">Se deconnecter</button>
+        </div>
       </div>
 
-      <form id="password-set-form" class="password-form">
-        <h3>Mot de passe du compte</h3>
+      <div id="seed-workspace">
+        <form id="seed-form" class="seed-form">
+          <input type="hidden" id="seed-id">
 
-        <label for="new-password">Nouveau mot de passe</label>
-        <input type="password" id="new-password" minlength="8" placeholder="Minimum 8 caracteres" required>
+          <label for="plant-name">Plante</label>
+          <input type="text" id="plant-name" required placeholder="Tomate cerise">
 
-        <label for="confirm-password">Confirmer le mot de passe</label>
-        <input type="password" id="confirm-password" minlength="8" placeholder="Retape le mot de passe" required>
+          <label for="seed-date">Date de semis</label>
+          <input type="date" id="seed-date" required>
 
-        <button type="submit" class="secondary">Enregistrer mon mot de passe</button>
-        <p id="password-message" class="status-message"></p>
-      </form>
+          <label for="seed-location">Emplacement</label>
+          <input type="text" id="seed-location" required placeholder="Serre, balcon, potager...">
 
-      <form id="seed-form" class="seed-form">
-        <input type="hidden" id="seed-id">
+          <label for="seed-photo">Photo (optionnel)</label>
+          <input type="file" id="seed-photo" accept="image/*">
 
-        <label for="plant-name">Plante</label>
-        <input type="text" id="plant-name" required placeholder="Tomate cerise">
+          <button type="submit" id="save-btn">Ajouter le semis</button>
+          <button type="button" id="cancel-edit-btn" class="secondary hidden" hidden>Annuler la modification</button>
+        </form>
 
-        <label for="seed-date">Date de semis</label>
-        <input type="date" id="seed-date" required>
+        <p id="seed-message" class="status-message"></p>
+        <div id="seed-list" class="seed-list"></div>
+      </div>
 
-        <label for="seed-location">Emplacement</label>
-        <input type="text" id="seed-location" required placeholder="Serre, balcon, potager...">
+      <div id="password-workspace" class="hidden" hidden>
+        <form id="password-set-form" class="password-form">
+          <h3>Mot de passe du compte</h3>
 
-        <label for="seed-photo">Photo (optionnel)</label>
-        <input type="file" id="seed-photo" accept="image/*">
+          <label for="new-password">Nouveau mot de passe</label>
+          <input type="password" id="new-password" minlength="8" placeholder="Minimum 8 caracteres" required>
 
-        <button type="submit" id="save-btn">Ajouter le semis</button>
-        <button type="button" id="cancel-edit-btn" class="secondary hidden" hidden>Annuler la modification</button>
-      </form>
+          <label for="confirm-password">Confirmer le mot de passe</label>
+          <input type="password" id="confirm-password" minlength="8" placeholder="Retape le mot de passe" required>
 
-      <p id="seed-message" class="status-message"></p>
-      <div id="seed-list" class="seed-list"></div>
+          <button type="submit">Enregistrer mon mot de passe</button>
+          <button id="close-password-btn" type="button" class="secondary">Retour aux semis</button>
+          <p id="password-message" class="status-message"></p>
+        </form>
+      </div>
     </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js?v=20260221-2"></script>
-  <script src="famille.js?v=20260221-2"></script>
+  <script src="supabase-config.js?v=20260221-3"></script>
+  <script src="famille.js?v=20260221-3"></script>
 </body>
 </html>

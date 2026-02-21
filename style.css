@@ -302,6 +302,11 @@ p {
   padding: 8px 12px;
 }
 
+.member-actions {
+  display: flex;
+  gap: 10px;
+}
+
 .seed-form {
   margin-top: 20px;
   border-top: 1px solid #e1ebe0;
@@ -309,7 +314,7 @@ p {
 }
 
 .password-form {
-  margin-top: 18px;
+  margin-top: 0;
   border-top: 1px solid #e1ebe0;
   padding-top: 16px;
 }
@@ -363,6 +368,11 @@ p {
   .member-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .member-actions {
+    width: 100%;
+    flex-direction: column;
   }
 
   .seed-list {

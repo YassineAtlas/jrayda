@@ -12,9 +12,13 @@ const passwordLoginInput = document.getElementById("password-login-input");
 const magicLinkForm = document.getElementById("magic-link-form");
 const magicEmailInput = document.getElementById("magic-email");
 const logoutBtn = document.getElementById("logout-btn");
+const openPasswordBtn = document.getElementById("open-password-btn");
+const closePasswordBtn = document.getElementById("close-password-btn");
 const passwordSetForm = document.getElementById("password-set-form");
 const newPasswordInput = document.getElementById("new-password");
 const confirmPasswordInput = document.getElementById("confirm-password");
+const seedWorkspace = document.getElementById("seed-workspace");
+const passwordWorkspace = document.getElementById("password-workspace");
 
 const seedForm = document.getElementById("seed-form");
 const seedIdInput = document.getElementById("seed-id");
@@ -71,6 +75,21 @@ function resetSeedForm() {
 
 function resetPasswordForm() {
   passwordSetForm.reset();
+  setMessage(passwordMessage, "");
+}
+
+function showSeedWorkspace() {
+  seedWorkspace.classList.remove("hidden");
+  seedWorkspace.hidden = false;
+  passwordWorkspace.classList.add("hidden");
+  passwordWorkspace.hidden = true;
+}
+
+function showPasswordWorkspace() {
+  passwordWorkspace.classList.remove("hidden");
+  passwordWorkspace.hidden = false;
+  seedWorkspace.classList.add("hidden");
+  seedWorkspace.hidden = true;
 }
 
 function formatDateForDisplay(dateValue) {
@@ -199,7 +218,8 @@ async function applySession(session) {
   }
 
   showMemberPanel();
-  setMessage(passwordMessage, "");
+  showSeedWorkspace();
+  resetPasswordForm();
   setMessage(seedMessage, `Connecte: ${currentUser.email}`, "success");
   await loadSeeds();
 }
@@ -437,11 +457,8 @@ async function handlePasswordSet(event) {
   }
 
   resetPasswordForm();
-  setMessage(
-    passwordMessage,
-    "Mot de passe enregistre. Tu peux maintenant te connecter sans lien email.",
-    "success"
-  );
+  showSeedWorkspace();
+  setMessage(seedMessage, "Mot de passe enregistre. Tu peux continuer avec tes semis.", "success");
 }
 
 async function handleLogout() {
@@ -459,6 +476,11 @@ function attachEvents() {
   magicLinkForm.addEventListener("submit", handleMagicLinkLogin);
   passwordSetForm.addEventListener("submit", handlePasswordSet);
   logoutBtn.addEventListener("click", handleLogout);
+  openPasswordBtn.addEventListener("click", showPasswordWorkspace);
+  closePasswordBtn.addEventListener("click", () => {
+    resetPasswordForm();
+    showSeedWorkspace();
+  });
   seedForm.addEventListener("submit", handleSeedSubmit);
   cancelEditBtn.addEventListener("click", resetSeedForm);
 
