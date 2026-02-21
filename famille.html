@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Espace famille</title>
-  <link rel="stylesheet" href="style.css?v=20260221-1">
+  <link rel="stylesheet" href="style.css?v=20260221-2">
 </head>
 <body>
   <header class="site-header">
@@ -17,12 +17,26 @@
   <main class="family-container">
     <section class="panel" id="auth-panel">
       <h2>Connexion famille</h2>
-      <p>Entre ton email pour recevoir un lien de connexion.</p>
-      <form id="login-form">
-        <label for="email">Email</label>
-        <input type="email" id="email" required placeholder="prenom@exemple.com">
-        <button type="submit">Envoyer le lien</button>
+      <p>Connecte-toi avec ton mot de passe. Pour la premiere connexion, utilise le lien email.</p>
+
+      <form id="password-login-form">
+        <label for="password-email">Email</label>
+        <input type="email" id="password-email" required placeholder="prenom@exemple.com">
+
+        <label for="password-login-input">Mot de passe</label>
+        <input type="password" id="password-login-input" required minlength="8" placeholder="Ton mot de passe">
+
+        <button type="submit">Se connecter</button>
       </form>
+
+      <p class="auth-separator">ou</p>
+
+      <form id="magic-link-form">
+        <label for="magic-email">Premiere connexion / mot de passe oublie</label>
+        <input type="email" id="magic-email" required placeholder="prenom@exemple.com">
+        <button type="submit">Recevoir un lien par email</button>
+      </form>
+
       <p id="auth-message" class="status-message"></p>
     </section>
 
@@ -31,6 +45,19 @@
         <h2>Mes semis</h2>
         <button id="logout-btn" type="button">Se deconnecter</button>
       </div>
+
+      <form id="password-set-form" class="password-form">
+        <h3>Mot de passe du compte</h3>
+
+        <label for="new-password">Nouveau mot de passe</label>
+        <input type="password" id="new-password" minlength="8" placeholder="Minimum 8 caracteres" required>
+
+        <label for="confirm-password">Confirmer le mot de passe</label>
+        <input type="password" id="confirm-password" minlength="8" placeholder="Retape le mot de passe" required>
+
+        <button type="submit" class="secondary">Enregistrer mon mot de passe</button>
+        <p id="password-message" class="status-message"></p>
+      </form>
 
       <form id="seed-form" class="seed-form">
         <input type="hidden" id="seed-id">
@@ -57,7 +84,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js?v=20260221-1"></script>
-  <script src="famille.js?v=20260221-1"></script>
+  <script src="supabase-config.js?v=20260221-2"></script>
+  <script src="famille.js?v=20260221-2"></script>
 </body>
 </html>

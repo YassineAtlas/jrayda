@@ -4,10 +4,17 @@ const authPanel = document.getElementById("auth-panel");
 const memberPanel = document.getElementById("member-panel");
 const authMessage = document.getElementById("auth-message");
 const seedMessage = document.getElementById("seed-message");
+const passwordMessage = document.getElementById("password-message");
 
-const loginForm = document.getElementById("login-form");
-const emailInput = document.getElementById("email");
+const passwordLoginForm = document.getElementById("password-login-form");
+const passwordEmailInput = document.getElementById("password-email");
+const passwordLoginInput = document.getElementById("password-login-input");
+const magicLinkForm = document.getElementById("magic-link-form");
+const magicEmailInput = document.getElementById("magic-email");
 const logoutBtn = document.getElementById("logout-btn");
+const passwordSetForm = document.getElementById("password-set-form");
+const newPasswordInput = document.getElementById("new-password");
+const confirmPasswordInput = document.getElementById("confirm-password");
 
 const seedForm = document.getElementById("seed-form");
 const seedIdInput = document.getElementById("seed-id");
@@ -60,6 +67,10 @@ function resetSeedForm() {
   saveBtn.textContent = "Ajouter le semis";
   cancelEditBtn.classList.add("hidden");
   cancelEditBtn.hidden = true;
+}
+
+function resetPasswordForm() {
+  passwordSetForm.reset();
 }
 
 function formatDateForDisplay(dateValue) {
@@ -170,6 +181,7 @@ async function applySession(session) {
   if (!currentUser) {
     showAuthPanel();
     resetSeedForm();
+    resetPasswordForm();
     seedList.innerHTML = "";
     return;
   }
@@ -187,6 +199,7 @@ async function applySession(session) {
   }
 
   showMemberPanel();
+  setMessage(passwordMessage, "");
   setMessage(seedMessage, `Connecte: ${currentUser.email}`, "success");
   await loadSeeds();
 }
@@ -343,10 +356,32 @@ async function handleSeedSubmit(event) {
   await loadSeeds();
 }
 
-async function handleLogin(event) {
+async function handlePasswordLogin(event) {
   event.preventDefault();
 
-  const email = emailInput.value.trim().toLowerCase();
+  const email = passwordEmailInput.value.trim().toLowerCase();
+  const password = passwordLoginInput.value;
+
+  if (!email || !password) {
+    setMessage(authMessage, "Email et mot de passe requis.", "error");
+    return;
+  }
+
+  setMessage(authMessage, "Connexion...");
+
+  const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error) {
+    setMessage(authMessage, `Erreur connexion: ${error.message}`, "error");
+    return;
+  }
+
+  setMessage(authMessage, "Connexion reussie.", "success");
+}
+
+async function handleMagicLinkLogin(event) {
+  event.preventDefault();
+
+  const email = magicEmailInput.value.trim().toLowerCase();
   if (!email) {
     setMessage(authMessage, "Email requis.", "error");
     return;
@@ -364,7 +399,49 @@ async function handleLogin(event) {
   }
 
   setMessage(authMessage, "Lien envoye. Ouvre ta boite mail.", "success");
-  loginForm.reset();
+  magicLinkForm.reset();
+}
+
+async function handlePasswordSet(event) {
+  event.preventDefault();
+
+  if (!currentUser) {
+    setMessage(passwordMessage, "Connexion requise.", "error");
+    return;
+  }
+
+  const newPassword = newPasswordInput.value;
+  const confirmPassword = confirmPasswordInput.value;
+
+  if (!newPassword || !confirmPassword) {
+    setMessage(passwordMessage, "Saisis et confirme ton mot de passe.", "error");
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    setMessage(passwordMessage, "Le mot de passe doit faire au moins 8 caracteres.", "error");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    setMessage(passwordMessage, "Les mots de passe ne correspondent pas.", "error");
+    return;
+  }
+
+  setMessage(passwordMessage, "Enregistrement du mot de passe...");
+
+  const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
+  if (error) {
+    setMessage(passwordMessage, `Erreur mot de passe: ${error.message}`, "error");
+    return;
+  }
+
+  resetPasswordForm();
+  setMessage(
+    passwordMessage,
+    "Mot de passe enregistre. Tu peux maintenant te connecter sans lien email.",
+    "success"
+  );
 }
 
 async function handleLogout() {
@@ -378,7 +455,9 @@ async function handleLogout() {
 }
 
 function attachEvents() {
-  loginForm.addEventListener("submit", handleLogin);
+  passwordLoginForm.addEventListener("submit", handlePasswordLogin);
+  magicLinkForm.addEventListener("submit", handleMagicLinkLogin);
+  passwordSetForm.addEventListener("submit", handlePasswordSet);
   logoutBtn.addEventListener("click", handleLogout);
   seedForm.addEventListener("submit", handleSeedSubmit);
   cancelEditBtn.addEventListener("click", resetSeedForm);
