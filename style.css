@@ -11,7 +11,8 @@ body {
 /* ===== Layout Container ===== */
 
 #plant-detail,
-#plant-list {
+#plant-list,
+#plant-semis {
   max-width: 900px;
   margin: 40px auto;
   padding: 30px;
@@ -106,7 +107,8 @@ p {
 @media (max-width: 768px) {
 
   #plant-detail,
-  #plant-list {
+  #plant-list,
+  #plant-semis {
     margin: 20px auto;
     padding: 20px;
   }
@@ -239,13 +241,17 @@ p {
 }
 
 .panel input,
+.panel select,
+.panel textarea,
 .panel button {
   font: inherit;
   padding: 10px 12px;
   border-radius: 8px;
 }
 
-.panel input {
+.panel input,
+.panel select,
+.panel textarea {
   border: 1px solid #cdd9ca;
 }
 
@@ -359,6 +365,67 @@ p {
   width: 100%;
 }
 
+.seed-open-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #2d5a2d;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.seed-week-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #dfe9d8;
+  color: #2d5a2d;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.updates-list {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.update-card {
+  background: #f9fbf8;
+  border: 1px solid #e1ebe0;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.update-date {
+  font-size: 13px;
+  color: #5f705f;
+}
+
+.plant-tabs {
+  max-width: 900px;
+  margin: 20px auto 0;
+  padding: 0 6px;
+  display: flex;
+  gap: 10px;
+}
+
+.tab-button {
+  border: 1px solid #cdd9ca;
+  background: #f2f7ef;
+  color: #2f3e2f;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tab-button.active {
+  background: #6b9e6b;
+  color: #ffffff;
+  border-color: #6b9e6b;
+}
+
 @media (max-width: 768px) {
   .site-nav {
     flex-direction: column;
@@ -376,6 +443,10 @@ p {
   }
 
   .seed-list {
+    grid-template-columns: 1fr;
+  }
+
+  .updates-list {
     grid-template-columns: 1fr;
   }
 }

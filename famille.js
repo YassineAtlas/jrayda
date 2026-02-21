@@ -22,8 +22,9 @@ const passwordWorkspace = document.getElementById("password-workspace");
 
 const seedForm = document.getElementById("seed-form");
 const seedIdInput = document.getElementById("seed-id");
-const plantNameInput = document.getElementById("plant-name");
+const plantSelectInput = document.getElementById("plant-select");
 const seedDateInput = document.getElementById("seed-date");
+const currentWeekInput = document.getElementById("current-week");
 const seedLocationInput = document.getElementById("seed-location");
 const seedPhotoInput = document.getElementById("seed-photo");
 const saveBtn = document.getElementById("save-btn");
@@ -33,6 +34,7 @@ const seedList = document.getElementById("seed-list");
 let supabaseClient = null;
 let currentUser = null;
 let seedCache = [];
+let plantCatalog = [];
 
 function setMessage(element, text, type = "") {
   element.textContent = text || "";
@@ -51,6 +53,45 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function normalizeText(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+function formatDateForDisplay(dateValue) {
+  if (!dateValue) {
+    return "-";
+  }
+  const date = new Date(`${dateValue}T00:00:00`);
+  return date.toLocaleDateString("fr-FR");
+}
+
+function getRedirectUrl() {
+  return `${window.location.origin}${window.location.pathname}`;
+}
+
+function calculateCurrentWeek(sowingDate) {
+  if (!sowingDate) {
+    return 1;
+  }
+  const start = new Date(`${sowingDate}T00:00:00`);
+  if (Number.isNaN(start.getTime())) {
+    return 1;
+  }
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const diffMs = now.getTime() - start.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return Math.max(1, Math.floor(diffDays / 7) + 1);
+}
+
+function getSeedWeek(seed) {
+  const dbWeek = Number(seed.current_week);
+  if (Number.isInteger(dbWeek) && dbWeek > 0) {
+    return dbWeek;
+  }
+  return calculateCurrentWeek(seed.sowing_date);
+}
+
 function showAuthPanel() {
   authPanel.classList.remove("hidden");
   authPanel.hidden = false;
@@ -63,19 +104,6 @@ function showMemberPanel() {
   authPanel.hidden = true;
   memberPanel.classList.remove("hidden");
   memberPanel.hidden = false;
-}
-
-function resetSeedForm() {
-  seedForm.reset();
-  seedIdInput.value = "";
-  saveBtn.textContent = "Ajouter le semis";
-  cancelEditBtn.classList.add("hidden");
-  cancelEditBtn.hidden = true;
-}
-
-function resetPasswordForm() {
-  passwordSetForm.reset();
-  setMessage(passwordMessage, "");
 }
 
 function showSeedWorkspace() {
@@ -92,16 +120,53 @@ function showPasswordWorkspace() {
   seedWorkspace.hidden = true;
 }
 
-function formatDateForDisplay(dateValue) {
-  if (!dateValue) {
-    return "-";
-  }
-  const date = new Date(`${dateValue}T00:00:00`);
-  return date.toLocaleDateString("fr-FR");
+function resetPasswordForm() {
+  passwordSetForm.reset();
+  setMessage(passwordMessage, "");
 }
 
-function getRedirectUrl() {
-  return `${window.location.origin}${window.location.pathname}`;
+function resetSeedForm() {
+  seedForm.reset();
+  seedIdInput.value = "";
+  saveBtn.textContent = "Ajouter le semis";
+  cancelEditBtn.classList.add("hidden");
+  cancelEditBtn.hidden = true;
+  currentWeekInput.value = "1";
+}
+
+function getPlantNameById(plantId) {
+  const numericId = Number(plantId);
+  const plant = plantCatalog.find((item) => Number(item.id) === numericId);
+  return plant ? plant.name : "";
+}
+
+function getPlantIdByName(name) {
+  const normalized = normalizeText(name);
+  if (!normalized) {
+    return "";
+  }
+  const match = plantCatalog.find((item) => normalizeText(item.name) === normalized);
+  return match ? String(match.id) : "";
+}
+
+function populatePlantOptions() {
+  plantSelectInput.innerHTML = '<option value="">Choisir une plante</option>';
+  const options = plantCatalog
+    .slice()
+    .sort((a, b) => a.name.localeCompare(b.name, "fr"))
+    .map((plant) => `<option value="${plant.id}">${escapeHtml(plant.name)}</option>`)
+    .join("");
+  plantSelectInput.insertAdjacentHTML("beforeend", options);
+}
+
+async function loadPlantCatalog() {
+  const response = await fetch("seeds.json");
+  const data = await response.json();
+  plantCatalog = (data || []).map((plant) => ({
+    id: Number(plant.id),
+    name: plant?.general?.name || plant?.general?.plant_name || `Plante #${plant.id}`
+  }));
+  populatePlantOptions();
 }
 
 async function getSignedPhotoUrl(path) {
@@ -134,8 +199,10 @@ async function renderSeeds(seeds) {
       const photo = signedUrls[index]
         ? `<img class="seed-photo" src="${signedUrls[index]}" alt="Photo semis">`
         : "";
+      const plantName = seed.plant_name || getPlantNameById(seed.plant_id) || "Plante inconnue";
+      const week = getSeedWeek(seed);
 
-      const actions = canEdit
+      const ownerOrActions = canEdit
         ? `
           <div class="seed-card-actions">
             <button type="button" data-action="edit" data-seed-id="${seed.id}" class="secondary">Modifier</button>
@@ -147,10 +214,12 @@ async function renderSeeds(seeds) {
       return `
         <article class="seed-card">
           ${photo}
-          <h3>${escapeHtml(seed.plant_name)}</h3>
+          <div class="seed-week-badge">Semaine ${week}</div>
+          <h3>${escapeHtml(plantName)}</h3>
           <p><strong>Date semis:</strong> ${escapeHtml(formatDateForDisplay(seed.sowing_date))}</p>
           <p><strong>Emplacement:</strong> ${escapeHtml(seed.location)}</p>
-          ${actions}
+          <a class="seed-open-link" href="semis.html?id=${seed.id}">Ouvrir le semis</a>
+          ${ownerOrActions}
         </article>
       `;
     })
@@ -161,7 +230,7 @@ async function loadSeeds() {
   setMessage(seedMessage, "Chargement des semis...");
   const { data, error } = await supabaseClient
     .from("semis")
-    .select("id, user_id, owner_email, plant_name, sowing_date, location, photo_path, created_at")
+    .select("id, user_id, owner_email, plant_id, plant_name, sowing_date, current_week, location, photo_path, created_at")
     .order("sowing_date", { ascending: false });
 
   if (error) {
@@ -175,7 +244,7 @@ async function loadSeeds() {
 }
 
 async function isFamilyMember(email) {
-  const normalizedEmail = (email || "").trim().toLowerCase();
+  const normalizedEmail = normalizeText(email);
   if (!normalizedEmail) {
     return false;
   }
@@ -224,15 +293,14 @@ async function applySession(session) {
   await loadSeeds();
 }
 
-async function uploadPhotoIfNeeded() {
-  const file = seedPhotoInput.files[0];
+async function uploadPhotoIfNeeded(fileInput) {
+  const file = fileInput.files[0];
   if (!file) {
     return null;
   }
 
   const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
   const path = `${currentUser.id}/${Date.now()}-${safeName}`;
-
   const { error } = await supabaseClient.storage.from(PHOTO_BUCKET).upload(path, file, {
     upsert: false,
     contentType: file.type || "image/jpeg"
@@ -258,9 +326,12 @@ function getSeedById(seedId) {
 }
 
 function startEdit(seed) {
+  const plantId = seed.plant_id ? String(seed.plant_id) : getPlantIdByName(seed.plant_name);
+
   seedIdInput.value = seed.id;
-  plantNameInput.value = seed.plant_name;
+  plantSelectInput.value = plantId || "";
   seedDateInput.value = seed.sowing_date;
+  currentWeekInput.value = String(getSeedWeek(seed));
   seedLocationInput.value = seed.location;
   saveBtn.textContent = "Enregistrer la modification";
   cancelEditBtn.classList.remove("hidden");
@@ -274,7 +345,7 @@ async function handleDelete(seed) {
     return;
   }
 
-  const shouldDelete = window.confirm(`Supprimer le semis "${seed.plant_name}" ?`);
+  const shouldDelete = window.confirm("Supprimer ce semis et son suivi ?");
   if (!shouldDelete) {
     return;
   }
@@ -308,14 +379,16 @@ async function handleSeedSubmit(event) {
     return;
   }
 
-  const plantName = plantNameInput.value.trim();
-  const sowingDate = seedDateInput.value;
-  const location = seedLocationInput.value.trim();
   const seedId = seedIdInput.value.trim();
   const isEdit = Boolean(seedId);
+  const plantId = Number(plantSelectInput.value);
+  const plantName = getPlantNameById(plantId);
+  const sowingDate = seedDateInput.value;
+  const location = seedLocationInput.value.trim();
+  const currentWeek = Number(currentWeekInput.value);
 
-  if (!plantName || !sowingDate || !location) {
-    setMessage(seedMessage, "Tous les champs obligatoires doivent etre remplis.", "error");
+  if (!plantId || !plantName || !sowingDate || !location || !Number.isInteger(currentWeek) || currentWeek < 1) {
+    setMessage(seedMessage, "Complete tous les champs obligatoires.", "error");
     return;
   }
 
@@ -328,7 +401,7 @@ async function handleSeedSubmit(event) {
   setMessage(seedMessage, "Enregistrement...");
 
   let photoPath = existingSeed?.photo_path || null;
-  const uploadedPhotoPath = await uploadPhotoIfNeeded();
+  const uploadedPhotoPath = await uploadPhotoIfNeeded(seedPhotoInput);
   if (uploadedPhotoPath === false) {
     return;
   }
@@ -337,8 +410,10 @@ async function handleSeedSubmit(event) {
   }
 
   const payload = {
+    plant_id: plantId,
     plant_name: plantName,
     sowing_date: sowingDate,
+    current_week: currentWeek,
     location,
     photo_path: photoPath
   };
@@ -359,13 +434,12 @@ async function handleSeedSubmit(event) {
       await deletePhotoIfExists(existingSeed.photo_path);
     }
   } else {
-    const insertPayload = {
+    const { error } = await supabaseClient.from("semis").insert({
       ...payload,
       user_id: currentUser.id,
-      owner_email: (currentUser.email || "").toLowerCase()
-    };
+      owner_email: normalizeText(currentUser.email)
+    });
 
-    const { error } = await supabaseClient.from("semis").insert(insertPayload);
     if (error) {
       setMessage(seedMessage, `Erreur creation: ${error.message}`, "error");
       return;
@@ -379,7 +453,7 @@ async function handleSeedSubmit(event) {
 async function handlePasswordLogin(event) {
   event.preventDefault();
 
-  const email = passwordEmailInput.value.trim().toLowerCase();
+  const email = normalizeText(passwordEmailInput.value);
   const password = passwordLoginInput.value;
 
   if (!email || !password) {
@@ -388,20 +462,18 @@ async function handlePasswordLogin(event) {
   }
 
   setMessage(authMessage, "Connexion...");
-
   const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) {
     setMessage(authMessage, `Erreur connexion: ${error.message}`, "error");
     return;
   }
-
   setMessage(authMessage, "Connexion reussie.", "success");
 }
 
 async function handleMagicLinkLogin(event) {
   event.preventDefault();
 
-  const email = magicEmailInput.value.trim().toLowerCase();
+  const email = normalizeText(magicEmailInput.value);
   if (!email) {
     setMessage(authMessage, "Email requis.", "error");
     return;
@@ -449,7 +521,6 @@ async function handlePasswordSet(event) {
   }
 
   setMessage(passwordMessage, "Enregistrement du mot de passe...");
-
   const { error } = await supabaseClient.auth.updateUser({ password: newPassword });
   if (error) {
     setMessage(passwordMessage, `Erreur mot de passe: ${error.message}`, "error");
@@ -484,6 +555,12 @@ function attachEvents() {
   seedForm.addEventListener("submit", handleSeedSubmit);
   cancelEditBtn.addEventListener("click", resetSeedForm);
 
+  seedDateInput.addEventListener("change", () => {
+    if (!seedIdInput.value) {
+      currentWeekInput.value = String(calculateCurrentWeek(seedDateInput.value));
+    }
+  });
+
   seedList.addEventListener("click", async (event) => {
     const button = event.target.closest("button[data-action]");
     if (!button) {
@@ -503,6 +580,7 @@ function attachEvents() {
         setMessage(seedMessage, "Tu ne peux modifier que tes semis.", "error");
         return;
       }
+      showSeedWorkspace();
       startEdit(seed);
     }
 
@@ -514,11 +592,7 @@ function attachEvents() {
 
 async function init() {
   if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
-    setMessage(
-      authMessage,
-      "Configuration Supabase manquante dans supabase-config.js",
-      "error"
-    );
+    setMessage(authMessage, "Configuration Supabase manquante dans supabase-config.js", "error");
     return;
   }
 
@@ -526,6 +600,13 @@ async function init() {
     window.SUPABASE_URL,
     window.SUPABASE_ANON_KEY
   );
+
+  try {
+    await loadPlantCatalog();
+  } catch (error) {
+    setMessage(authMessage, "Impossible de charger la liste des plantes.", "error");
+    return;
+  }
 
   attachEvents();
 

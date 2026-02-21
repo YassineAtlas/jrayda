@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fiche plante</title>
-  <link rel="stylesheet" href="style.css?v=20260221-3">
+  <link rel="stylesheet" href="style.css?v=20260221-4">
 </head>
 <body>
   <header class="site-header">
@@ -14,8 +14,19 @@
     </div>
   </header>
 
-  <div id="plant-detail"></div>
+  <main id="plant-page">
+    <div class="plant-tabs">
+      <button id="tab-sheet" class="tab-button active" type="button">Fiche</button>
+      <button id="tab-semis" class="tab-button" type="button">Semis</button>
+    </div>
 
-  <script src="script.js?v=20260221-3"></script>
+    <div id="plant-detail"></div>
+    <div id="plant-semis" class="hidden" hidden></div>
+  </main>
+
+  <script src="script.js?v=20260221-4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js?v=20260221-4"></script>
+  <script src="plant-semis.js?v=20260221-4"></script>
 </body>
 </html>
