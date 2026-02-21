@@ -404,7 +404,7 @@ async function renderSeeds(seeds) {
           <h3>${escapeHtml(plantName)}</h3>
           <p><strong>Date semis:</strong> ${escapeHtml(formatDateForDisplay(seed.sowing_date))}</p>
           <p><strong>Emplacement:</strong> ${escapeHtml(seed.location)}</p>
-          <a class="seed-open-link" href="semis.html?id=${seed.id}">Ouvrir le semis</a>
+          <a class="seed-open-link seed-action-button" href="semis.html?id=${seed.id}">Voir le suivi</a>
           ${ownerOrActions}
         </article>
       `;

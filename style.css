@@ -232,6 +232,38 @@ p {
   align-items: start;
 }
 
+.plant-search-wrap {
+  max-width: 900px;
+  margin: 20px auto 0;
+  padding: 0 30px;
+}
+
+.plant-search-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+  color: #2d5a2d;
+}
+
+.plant-search-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cdd9ca;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.plant-search-status {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #5f705f;
+  font-weight: 600;
+}
+
+.plant-search-empty {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 1024px) {
   #plant-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -241,6 +273,10 @@ p {
 @media (max-width: 640px) {
   #plant-list {
     grid-template-columns: 1fr;
+  }
+
+  .plant-search-wrap {
+    padding: 0 20px;
   }
 }
 
@@ -489,6 +525,29 @@ p {
   color: #2d5a2d;
   font-weight: 600;
   text-decoration: underline;
+}
+
+.seed-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #6b9e6b;
+  background: #6b9e6b;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.seed-action-button:hover {
+  background: #4f7c4f;
+  border-color: #4f7c4f;
+}
+
+.seed-card .seed-action-button {
+  width: 100%;
 }
 
 .seed-week-badge {

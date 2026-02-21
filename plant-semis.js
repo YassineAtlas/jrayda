@@ -160,7 +160,7 @@ function renderSemisCards(rows, signedUrls) {
           <p><strong>Date semis:</strong> ${escapeHtml(formatDate(row.sowing_date))}</p>
           <p><strong>Emplacement:</strong> ${escapeHtml(row.location || "-")}</p>
           <p><strong>Membre:</strong> ${escapeHtml(row.owner_email || "-")}</p>
-          <a class="seed-open-link" href="semis.html?id=${row.id}">Ouvrir le suivi</a>
+          <a class="seed-open-link seed-action-button" href="semis.html?id=${row.id}">Voir le suivi</a>
         </article>
       `;
     })

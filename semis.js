@@ -1,6 +1,7 @@
 const PHOTO_BUCKET = "semis-photos";
 
 const semisDetail = document.getElementById("semis-detail");
+const semisTimeline = document.getElementById("semis-timeline");
 const updateForm = document.getElementById("update-form");
 const updateModeInput = document.getElementById("update-mode");
 const updateDateWrap = document.getElementById("update-date-wrap");
@@ -58,6 +59,14 @@ function formatDate(value) {
     return "-";
   }
   return new Date(`${value}T00:00:00`).toLocaleDateString("fr-FR");
+}
+
+function normalizeText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
 }
 
 function getTodayIsoDate() {
@@ -339,7 +348,7 @@ async function renderSemisDetail() {
     ? `<img class="seed-photo" src="${photoUrl}" alt="Photo du semis">`
     : "";
   const plantLink = semisRecord.plant_id
-    ? `<p><a class="seed-open-link" href="plant.html?id=${semisRecord.plant_id}">Voir la fiche plante</a></p>`
+    ? `<a class="seed-open-link seed-action-button" href="plant.html?id=${semisRecord.plant_id}">Voir fiche plante</a>`
     : "";
 
   semisDetail.innerHTML = `
@@ -351,6 +360,104 @@ async function renderSemisDetail() {
     <p><strong>Createur:</strong> ${escapeHtml(semisRecord.owner_email || "-")}</p>
     ${plantLink}
   `;
+}
+
+function findMatchingPlantFromCatalog(plants) {
+  if (!Array.isArray(plants) || !semisRecord) {
+    return null;
+  }
+
+  const semisPlantId = Number(semisRecord.plant_id);
+  if (Number.isInteger(semisPlantId) && semisPlantId > 0) {
+    const byId = plants.find((plant) => Number(plant.id) === semisPlantId);
+    if (byId) {
+      return byId;
+    }
+  }
+
+  const semisPlantName = normalizeText(semisRecord.plant_name);
+  if (!semisPlantName) {
+    return null;
+  }
+
+  return (
+    plants.find((plant) => {
+      const displayName = normalizeText(plant?.general?.name);
+      const plantTypeName = normalizeText(plant?.general?.plant_name);
+      return (
+        (displayName && displayName === semisPlantName) ||
+        (plantTypeName && plantTypeName === semisPlantName)
+      );
+    }) || null
+  );
+}
+
+function renderSemisTimeline(plant) {
+  if (!semisTimeline) {
+    return;
+  }
+
+  const timeline = plant?.timeline_culture;
+  if (!timeline) {
+    semisTimeline.innerHTML = "<p>Timeline indisponible pour ce semis.</p>";
+    return;
+  }
+
+  const entries = [
+    ["Semaine 1-2", timeline.week_1_2],
+    ["Semaine 3-4", timeline.week_3_4],
+    ["Semaine 5-6", timeline.week_5_6],
+    ["Semaine 7-8", timeline.week_7_8],
+    ["Semaine 9-10", timeline.week_9_10],
+    ["Semaine 11-12", timeline.week_11_12],
+    ["Semaine 13-14", timeline.week_13_14],
+    ["Semaine 15-16", timeline.week_15_16],
+    ["Semaine 17+", timeline.week_17_plus]
+  ].filter((entry) => Boolean(entry[1]));
+
+  if (!entries.length) {
+    semisTimeline.innerHTML = "<p>Timeline indisponible pour ce semis.</p>";
+    return;
+  }
+
+  const openSheetButton = Number.isInteger(Number(plant.id))
+    ? `<a class="seed-open-link seed-action-button" href="plant.html?id=${plant.id}">Voir la fiche complete</a>`
+    : "";
+
+  semisTimeline.innerHTML = `
+    ${openSheetButton}
+    <div class="timeline">
+      ${entries
+        .map(
+          (entry) =>
+            `<p><strong>${escapeHtml(entry[0])} :</strong> ${escapeHtml(entry[1])}</p>`
+        )
+        .join("")}
+    </div>
+  `;
+}
+
+async function loadSemisTimeline() {
+  if (!semisTimeline) {
+    return;
+  }
+
+  semisTimeline.innerHTML = "<p>Chargement de la timeline...</p>";
+
+  try {
+    const response = await fetch("seeds.json");
+    const plants = await response.json();
+    const plant = findMatchingPlantFromCatalog(plants);
+
+    if (!plant) {
+      semisTimeline.innerHTML = "<p>Aucune timeline trouvee pour ce semis.</p>";
+      return;
+    }
+
+    renderSemisTimeline(plant);
+  } catch (_error) {
+    semisTimeline.innerHTML = "<p>Impossible de charger la timeline pour le moment.</p>";
+  }
 }
 
 async function loadSemis() {
@@ -686,6 +793,7 @@ async function init() {
     return;
   }
 
+  await loadSemisTimeline();
   await loadUpdates();
 }
 

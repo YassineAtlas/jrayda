@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Suivi semis</title>
-  <link rel="stylesheet" href="style.css?v=20260221-13">
+  <link rel="stylesheet" href="style.css?v=20260221-14">
 </head>
 <body>
   <header class="site-header">
@@ -67,10 +67,17 @@
       <p id="update-message" class="status-message"></p>
       <div id="updates-list" class="updates-list"></div>
     </section>
+
+    <section class="panel" id="semis-timeline-panel">
+      <h2>Timeline complete</h2>
+      <div id="semis-timeline">
+        <p>Chargement de la timeline...</p>
+      </div>
+    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=20260221-6"></script>
-  <script src="semis.js?v=20260221-11"></script>
+  <script src="semis.js?v=20260221-12"></script>
 </body>
 </html>

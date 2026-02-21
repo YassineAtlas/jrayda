@@ -7,6 +7,14 @@ function formatMonths(monthArray) {
   return monthArray.map(m => months[m - 1]).join(", ");
 }
 
+function normalizeSearchText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
 fetch("seeds.json")
   .then(response => response.json())
   .then(data => {
@@ -27,9 +35,28 @@ fetch("seeds.json")
 
 function displayPlantList(plants) {
   const container = document.getElementById("plant-list");
+  if (!container) {
+    return;
+  }
 
-  plants.forEach(plant => {
+  const searchInputId = "plant-search-input";
+  let searchWrap = document.getElementById("plant-search-wrap");
+  if (!searchWrap) {
+    searchWrap = document.createElement("div");
+    searchWrap.id = "plant-search-wrap";
+    searchWrap.className = "plant-search-wrap";
+    searchWrap.innerHTML = `
+      <label for="${searchInputId}" class="plant-search-label">Rechercher une plante</label>
+      <input id="${searchInputId}" class="plant-search-input" type="search" placeholder="Nom, type, nom latin...">
+      <p id="plant-search-status" class="plant-search-status"></p>
+    `;
+    container.parentElement.insertBefore(searchWrap, container);
+  }
 
+  const searchInput = document.getElementById(searchInputId);
+  const searchStatus = document.getElementById("plant-search-status");
+
+  const createPlantCard = (plant) => {
     const imagePath = `images/${plant.id}/main.jpg`;
     const sheetUrl = `plant.html?id=${plant.id}`;
     const semisUrl = `plant.html?id=${plant.id}&tab=semis`;
@@ -42,13 +69,13 @@ function displayPlantList(plants) {
     card.dataset.href = sheetUrl;
 
     card.innerHTML = `
-      <img src="${imagePath}" alt="Aperçu" class="card-image">
+      <img src="${imagePath}" alt="Apercu" class="card-image">
 
-      <h2>${plant.general.name} – ${plant.general.plant_name}</h2>
+      <h2>${plant.general.name} - ${plant.general.plant_name}</h2>
 
-      <p><strong>Difficulté :</strong> ${plant.general.difficulty_level}</p>
+      <p><strong>Difficulte :</strong> ${plant.general.difficulty_level}</p>
       <p><strong>Type :</strong> ${plant.general.type}</p>
-      <p><strong>Germination idéale :</strong> ${plant.germination.ideal_temp_c.min}-${plant.germination.ideal_temp_c.max} &deg;C</p>
+      <p><strong>Germination ideale :</strong> ${plant.germination.ideal_temp_c.min}-${plant.germination.ideal_temp_c.max} &deg;C</p>
       <p><strong>En stock :</strong> ${plant.general.in_stock ? "Oui" : "Non"}</p>
 
       <div class="card-actions">
@@ -75,8 +102,49 @@ function displayPlantList(plants) {
       window.location.href = card.dataset.href;
     });
 
-    container.appendChild(card);
-  });
+    return card;
+  };
+
+  const renderList = (query) => {
+    const normalizedQuery = normalizeSearchText(query);
+    const filteredPlants = normalizedQuery
+      ? plants.filter((plant) => {
+          const fields = [
+            plant?.general?.name,
+            plant?.general?.plant_name,
+            plant?.general?.latin_name,
+            plant?.general?.type
+          ];
+          return fields.some((field) => normalizeSearchText(field).includes(normalizedQuery));
+        })
+      : plants;
+
+    container.innerHTML = "";
+
+    if (!filteredPlants.length) {
+      container.innerHTML = "<p class=\"plant-search-empty\">Aucune plante ne correspond a la recherche.</p>";
+    } else {
+      filteredPlants.forEach((plant) => {
+        container.appendChild(createPlantCard(plant));
+      });
+    }
+
+    if (!searchStatus) {
+      return;
+    }
+    if (normalizedQuery) {
+      searchStatus.textContent = `${filteredPlants.length} resultat(s) sur ${plants.length}`;
+      return;
+    }
+    searchStatus.textContent = `${plants.length} plante(s) disponible(s)`;
+  };
+
+  searchInput.value = "";
+  searchInput.oninput = () => {
+    renderList(searchInput.value);
+  };
+
+  renderList("");
 }
 
 /* ========================= */
@@ -201,3 +269,4 @@ function displayPlantDetail(plants) {
     <p><strong>Durée de vie :</strong> ${plant.seed_saving.seed_viability_years} ans</p>
   `;
 }
+
