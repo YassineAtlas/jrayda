@@ -70,6 +70,14 @@ function getRedirectUrl() {
   return `${window.location.origin}${window.location.pathname}`;
 }
 
+function getTodayIsoDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function getPrefillPlantIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const id = Number(params.get("plant_id"));
@@ -337,6 +345,21 @@ async function deletePhotoIfExists(path) {
   await supabaseClient.storage.from(PHOTO_BUCKET).remove([path]);
 }
 
+async function deletePhotosIfExist(paths) {
+  const cleanPaths = [...new Set((paths || []).filter(Boolean))];
+  if (!cleanPaths.length) {
+    return true;
+  }
+
+  const { error } = await supabaseClient.storage.from(PHOTO_BUCKET).remove(cleanPaths);
+  if (error) {
+    setMessage(seedMessage, `Erreur suppression photo(s): ${error.message}`, "error");
+    return false;
+  }
+
+  return true;
+}
+
 function getSeedById(seedId) {
   return seedCache.find((seed) => seed.id === seedId) || null;
 }
@@ -367,9 +390,20 @@ async function handleDelete(seed) {
   }
 
   setMessage(seedMessage, "Suppression...");
+  const { data: updates, error: updatesError } = await supabaseClient
+    .from("semis_updates")
+    .select("photo_path")
+    .eq("semis_id", seed.id);
 
-  if (seed.photo_path) {
-    await deletePhotoIfExists(seed.photo_path);
+  if (updatesError) {
+    setMessage(seedMessage, `Erreur lecture des photos du suivi: ${updatesError.message}`, "error");
+    return;
+  }
+
+  const updatePhotoPaths = (updates || []).map((item) => item.photo_path).filter(Boolean);
+  const photosDeleted = await deletePhotosIfExist([seed.photo_path, ...updatePhotoPaths]);
+  if (!photosDeleted) {
+    return;
   }
 
   const { error } = await supabaseClient
@@ -401,10 +435,16 @@ async function handleSeedSubmit(event) {
   const plantName = getPlantNameById(plantId);
   const sowingDate = seedDateInput.value;
   const location = seedLocationInput.value.trim();
+  const todayIsoDate = getTodayIsoDate();
   const calculatedCurrentWeek = calculateCurrentWeek(sowingDate);
 
   if (!plantId || !plantName || !sowingDate || !location) {
     setMessage(seedMessage, "Complete tous les champs obligatoires.", "error");
+    return;
+  }
+
+  if (sowingDate > todayIsoDate) {
+    setMessage(seedMessage, "La date de semis ne peut pas etre dans le futur.", "error");
     return;
   }
 
@@ -613,6 +653,7 @@ async function init() {
   }
 
   prefillPlantId = getPrefillPlantIdFromUrl();
+  seedDateInput.max = getTodayIsoDate();
 
   supabaseClient = window.supabase.createClient(
     window.SUPABASE_URL,

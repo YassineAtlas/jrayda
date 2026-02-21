@@ -133,9 +133,10 @@ function applyUpdateModeFields() {
 
 function resolveTrackingValues() {
   const mode = updateModeInput.value;
+  const todayIsoDate = getTodayIsoDate();
 
   if (mode === "current_date") {
-    const eventDate = getTodayIsoDate();
+    const eventDate = todayIsoDate;
     return {
       weekNumber: calculateWeekFromDate(semisRecord.sowing_date, eventDate),
       eventDate
@@ -146,6 +147,9 @@ function resolveTrackingValues() {
     const eventDate = updateDateInput.value;
     if (!eventDate) {
       return { error: "Choisis une date de suivi." };
+    }
+    if (eventDate > todayIsoDate) {
+      return { error: "La date du suivi ne peut pas etre dans le futur." };
     }
     return {
       weekNumber: calculateWeekFromDate(semisRecord.sowing_date, eventDate),
@@ -207,6 +211,7 @@ async function loadSemis() {
     showOwnerUpdateForm();
     updateModeInput.value = "current_date";
     updateDateInput.value = getTodayIsoDate();
+    updateDateInput.max = getTodayIsoDate();
     updateWeekInput.value = String(semisRecord.current_week || 1);
     applyUpdateModeFields();
   } else {

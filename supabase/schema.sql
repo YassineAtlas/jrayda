@@ -11,7 +11,7 @@ create table if not exists public.semis (
   owner_email text not null check (owner_email = lower(owner_email)),
   plant_id integer,
   plant_name text,
-  sowing_date date not null,
+  sowing_date date not null constraint semis_sowing_date_not_future check (sowing_date <= current_date),
   current_week integer not null default 1 check (current_week >= 1),
   location text not null,
   photo_path text,
@@ -23,6 +23,7 @@ alter table public.semis add column if not exists plant_id integer;
 alter table public.semis add column if not exists plant_name text;
 alter table public.semis add column if not exists current_week integer;
 update public.semis set current_week = 1 where current_week is null;
+update public.semis set sowing_date = current_date where sowing_date > current_date;
 alter table public.semis alter column current_week set default 1;
 
 create table if not exists public.semis_updates (
@@ -30,13 +31,46 @@ create table if not exists public.semis_updates (
   semis_id uuid not null references public.semis(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   week_number integer not null check (week_number >= 1),
-  event_date date,
+  event_date date constraint semis_updates_event_date_not_future check (
+    event_date is null or event_date <= current_date
+  ),
   note text,
   photo_path text,
   created_at timestamptz not null default now()
 );
 
 alter table public.semis_updates add column if not exists event_date date;
+update public.semis_updates set event_date = current_date where event_date > current_date;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'semis_sowing_date_not_future'
+      and conrelid = 'public.semis'::regclass
+  ) then
+    alter table public.semis
+      add constraint semis_sowing_date_not_future
+      check (sowing_date <= current_date);
+  end if;
+end;
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'semis_updates_event_date_not_future'
+      and conrelid = 'public.semis_updates'::regclass
+  ) then
+    alter table public.semis_updates
+      add constraint semis_updates_event_date_not_future
+      check (event_date is null or event_date <= current_date);
+  end if;
+end;
+$$;
 
 create index if not exists semis_plant_id_idx on public.semis(plant_id);
 create index if not exists semis_updates_semis_id_idx on public.semis_updates(semis_id);

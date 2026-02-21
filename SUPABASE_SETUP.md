@@ -4,7 +4,9 @@
 
 1. Cree un projet Supabase.
 2. Va dans `SQL Editor` et execute `supabase/schema.sql`.
-   - Si ton projet etait deja configure avant, re-execute ce fichier (il contient aussi la migration `event_date` pour le suivi).
+   - Si ton projet etait deja configure avant, re-execute ce fichier (il contient aussi:
+     - migration `event_date` pour le suivi
+     - regles SQL anti-dates futures sur semis/suivi)
 3. Dans `Authentication > Providers > Email`, active:
    - `Enable Email Signup`
    - `Enable Email Confirmations`
