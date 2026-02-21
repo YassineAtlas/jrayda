@@ -3,7 +3,7 @@
     "id": 1,
 
     "general": {
-      "name": "Rondo",
+      "name": "Petit pois Rondo",
       "plant_name": "Petit pois nain",
       "latin_name": "Pisum sativum",
       "type": "Légume",
@@ -111,7 +111,7 @@
   "id": 2,
 
   "general": {
-    "name": "Paris Island",
+    "name": "Laitue Paris Island",
     "plant_name": "Laitue romaine",
     "latin_name": "Lactuca sativa",
     "type": "Légume feuille",
@@ -205,7 +205,7 @@
   "id": 3,
 
   "general": {
-    "name": "Saint Pierre",
+    "name": "Tomate Saint Pierre",
     "plant_name": "Tomate",
     "latin_name": "Solanum lycopersicum",
     "type": "Légume fruit",
@@ -299,7 +299,7 @@
   "id": 4,
 
   "general": {
-    "name": "Ashley",
+    "name": "Concombre Ashley",
     "plant_name": "Concombre",
     "latin_name": "Cucumis sativus",
     "type": "Légume fruit",
@@ -487,7 +487,7 @@
   "id": 6,
 
   "general": {
-    "name": "Blanche",
+    "name": "Moutarde Blanche",
     "plant_name": "Moutarde",
     "latin_name": "Sinapis alba",
     "type": "Légume feuille / Engrais vert",
@@ -580,7 +580,7 @@
 {
   "id": 7,
   "general": {
-    "name": "Cerise",
+    "name": "Tomate Cerise",
     "plant_name": "Tomate",
     "latin_name": "Solanum lycopersicum var. cerasiforme",
     "type": "Legume fruit",
@@ -667,7 +667,7 @@
 {
   "id": 8,
   "general": {
-    "name": "Campbell 33",
+    "name": "Tomate Campbell 33",
     "plant_name": "Tomate",
     "latin_name": "Solanum lycopersicum",
     "type": "Legume fruit",
@@ -754,7 +754,7 @@
 {
   "id": 9,
   "general": {
-    "name": "Buenos Aires",
+    "name": "Haricot Buenos Aires",
     "plant_name": "Haricot",
     "latin_name": "Phaseolus vulgaris",
     "type": "Legume",
@@ -841,7 +841,7 @@
 {
   "id": 10,
   "general": {
-    "name": "Roma",
+    "name": "Tomate Roma",
     "plant_name": "Tomate",
     "latin_name": "Solanum lycopersicum",
     "type": "Legume fruit",
@@ -928,7 +928,7 @@
 {
   "id": 11,
   "general": {
-    "name": "National Pickles",
+    "name": "Cornichon National Pickles",
     "plant_name": "Cornichon",
     "latin_name": "Cucumis sativus",
     "type": "Legume fruit",
@@ -1001,7 +1001,7 @@
 {
   "id": 12,
   "general": {
-    "name": "Gold Nugget",
+    "name": "Tomate cerise Gold Nugget",
     "plant_name": "Tomate cerise",
     "latin_name": "Solanum lycopersicum var. cerasiforme",
     "type": "Legume fruit",
@@ -1147,7 +1147,7 @@
 {
   "id": 14,
   "general": {
-    "name": "Yediveren",
+    "name": "Piment Yediveren",
     "plant_name": "Piment",
     "latin_name": "Capsicum annuum",
     "type": "Legume fruit",
@@ -1220,7 +1220,7 @@
 {
   "id": 15,
   "general": {
-    "name": "Habanero rouge des Caraibes",
+    "name": "Piment Habanero rouge des Caraibes",
     "plant_name": "Piment",
     "latin_name": "Capsicum chinense",
     "type": "Legume fruit",
@@ -1444,3 +1444,4 @@
 }
 
 ]
+
