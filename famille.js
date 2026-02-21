@@ -42,12 +42,16 @@ function escapeHtml(value) {
 
 function showAuthPanel() {
   authPanel.classList.remove("hidden");
+  authPanel.hidden = false;
   memberPanel.classList.add("hidden");
+  memberPanel.hidden = true;
 }
 
 function showMemberPanel() {
   authPanel.classList.add("hidden");
+  authPanel.hidden = true;
   memberPanel.classList.remove("hidden");
+  memberPanel.hidden = false;
 }
 
 function resetSeedForm() {
@@ -55,6 +59,7 @@ function resetSeedForm() {
   seedIdInput.value = "";
   saveBtn.textContent = "Ajouter le semis";
   cancelEditBtn.classList.add("hidden");
+  cancelEditBtn.hidden = true;
 }
 
 function formatDateForDisplay(dateValue) {
@@ -226,6 +231,7 @@ function startEdit(seed) {
   seedLocationInput.value = seed.location;
   saveBtn.textContent = "Enregistrer la modification";
   cancelEditBtn.classList.remove("hidden");
+  cancelEditBtn.hidden = false;
   setMessage(seedMessage, "Mode modification actif.");
 }
 
