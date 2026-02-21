@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Espace famille</title>
-  <link rel="stylesheet" href="style.css?v=20260221-6">
+  <link rel="stylesheet" href="style.css?v=20260221-8">
 </head>
 <body>
   <header class="site-header">
@@ -67,8 +67,11 @@
           <label for="seed-location">Emplacement</label>
           <input type="text" id="seed-location" required placeholder="Serre, balcon, potager...">
 
-          <label for="seed-photo">Photo (optionnel)</label>
+          <label for="seed-photo">Photo depuis fichiers (optionnel)</label>
           <input type="file" id="seed-photo" accept="image/*">
+
+          <label for="seed-photo-camera">Prendre une photo (mobile)</label>
+          <input type="file" id="seed-photo-camera" accept="image/*" capture="environment">
 
           <button type="submit" id="save-btn">Ajouter le semis</button>
           <button type="button" id="cancel-edit-btn" class="secondary hidden" hidden>Annuler la modification</button>
@@ -98,6 +101,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=20260221-6"></script>
-  <script src="famille.js?v=20260221-6"></script>
+  <script src="famille.js?v=20260221-7"></script>
 </body>
 </html>

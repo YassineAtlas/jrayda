@@ -27,6 +27,7 @@ const seedDateInput = document.getElementById("seed-date");
 const currentWeekInput = document.getElementById("current-week");
 const seedLocationInput = document.getElementById("seed-location");
 const seedPhotoInput = document.getElementById("seed-photo");
+const seedPhotoCameraInput = document.getElementById("seed-photo-camera");
 const saveBtn = document.getElementById("save-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const seedList = document.getElementById("seed-list");
@@ -85,6 +86,16 @@ function getPrefillPlantIdFromUrl() {
     return "";
   }
   return String(id);
+}
+
+function getFirstSelectedFile(inputs) {
+  for (const input of inputs) {
+    const file = input?.files?.[0];
+    if (file) {
+      return file;
+    }
+  }
+  return null;
 }
 
 function calculateCurrentWeek(sowingDate) {
@@ -317,8 +328,8 @@ async function applySession(session) {
   await loadSeeds();
 }
 
-async function uploadPhotoIfNeeded(fileInput) {
-  const file = fileInput.files[0];
+async function uploadPhotoIfNeeded(fileInputs) {
+  const file = getFirstSelectedFile(fileInputs);
   if (!file) {
     return null;
   }
@@ -457,7 +468,7 @@ async function handleSeedSubmit(event) {
   setMessage(seedMessage, "Enregistrement...");
 
   let photoPath = existingSeed?.photo_path || null;
-  const uploadedPhotoPath = await uploadPhotoIfNeeded(seedPhotoInput);
+  const uploadedPhotoPath = await uploadPhotoIfNeeded([seedPhotoCameraInput, seedPhotoInput]);
   if (uploadedPhotoPath === false) {
     return;
   }
@@ -616,6 +627,20 @@ function attachEvents() {
       currentWeekInput.value = String(calculateCurrentWeek(seedDateInput.value));
     }
   });
+
+  if (seedPhotoInput && seedPhotoCameraInput) {
+    seedPhotoInput.addEventListener("change", () => {
+      if (seedPhotoInput.files[0]) {
+        seedPhotoCameraInput.value = "";
+      }
+    });
+
+    seedPhotoCameraInput.addEventListener("change", () => {
+      if (seedPhotoCameraInput.files[0]) {
+        seedPhotoInput.value = "";
+      }
+    });
+  }
 
   seedList.addEventListener("click", async (event) => {
     const button = event.target.closest("button[data-action]");

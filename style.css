@@ -8,6 +8,12 @@ body {
   line-height: 1.6;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 /* ===== Layout Container ===== */
 
 #plant-detail,
@@ -87,6 +93,13 @@ p {
   display: grid;
   grid-template-columns: 1fr;
   gap: 8px;
+}
+
+.card-actions a {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
 }
 
 .card-actions .secondary-link {
@@ -271,12 +284,19 @@ p {
   font: inherit;
   padding: 10px 12px;
   border-radius: 8px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .panel input,
 .panel select,
 .panel textarea {
   border: 1px solid #cdd9ca;
+}
+
+.panel input[type="file"] {
+  overflow: hidden;
 }
 
 .panel input[readonly] {

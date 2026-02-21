@@ -9,6 +9,7 @@ const updateWeekWrap = document.getElementById("update-week-wrap");
 const updateWeekInput = document.getElementById("update-week");
 const updateNoteInput = document.getElementById("update-note");
 const updatePhotoInput = document.getElementById("update-photo");
+const updatePhotoCameraInput = document.getElementById("update-photo-camera");
 const updateMessage = document.getElementById("update-message");
 const updatesList = document.getElementById("updates-list");
 
@@ -72,6 +73,16 @@ function calculateWeekFromDate(sowingDate, eventDate) {
 function parseSemisId() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id") || "";
+}
+
+function getFirstSelectedFile(inputs) {
+  for (const input of inputs) {
+    const file = input?.files?.[0];
+    if (file) {
+      return file;
+    }
+  }
+  return null;
 }
 
 async function getSignedPhotoUrl(path) {
@@ -280,7 +291,7 @@ async function loadUpdates() {
 }
 
 async function uploadUpdatePhotoIfNeeded() {
-  const file = updatePhotoInput.files[0];
+  const file = getFirstSelectedFile([updatePhotoCameraInput, updatePhotoInput]);
   if (!file) {
     return null;
   }
@@ -317,7 +328,7 @@ async function handleUpdateSubmit(event) {
   }
 
   const note = updateNoteInput.value.trim();
-  const hasPhoto = Boolean(updatePhotoInput.files[0]);
+  const hasPhoto = Boolean(getFirstSelectedFile([updatePhotoCameraInput, updatePhotoInput]));
   const resolved = resolveTrackingValues();
 
   if (resolved.error) {
@@ -415,6 +426,20 @@ async function handleDeleteUpdate(updateId) {
 function attachEvents() {
   updateForm.addEventListener("submit", handleUpdateSubmit);
   updateModeInput.addEventListener("change", applyUpdateModeFields);
+
+  if (updatePhotoInput && updatePhotoCameraInput) {
+    updatePhotoInput.addEventListener("change", () => {
+      if (updatePhotoInput.files[0]) {
+        updatePhotoCameraInput.value = "";
+      }
+    });
+
+    updatePhotoCameraInput.addEventListener("change", () => {
+      if (updatePhotoCameraInput.files[0]) {
+        updatePhotoInput.value = "";
+      }
+    });
+  }
 
   updatesList.addEventListener("click", async (event) => {
     const button = event.target.closest("button[data-action='delete-update']");
