@@ -10,7 +10,6 @@ const updateWeekInput = document.getElementById("update-week");
 const updateNoteInput = document.getElementById("update-note");
 const updatePhotoInput = document.getElementById("update-photo");
 const updatePhotoCameraInput = document.getElementById("update-photo-camera");
-const updatePhotoStatus = document.getElementById("update-photo-status");
 const updateMessage = document.getElementById("update-message");
 const updatesList = document.getElementById("updates-list");
 
@@ -20,7 +19,6 @@ let semisId = "";
 let semisRecord = null;
 let isOwner = false;
 let updatesCache = [];
-let selectedUpdatePhotoFile = null;
 
 function setMessage(element, text, type = "") {
   element.textContent = text || "";
@@ -77,68 +75,14 @@ function parseSemisId() {
   return params.get("id") || "";
 }
 
-function setUpdatePhotoStatus(text, type = "") {
-  if (!updatePhotoStatus) {
-    return;
-  }
-  setMessage(updatePhotoStatus, text, type);
-}
-
-function setSelectedUpdatePhotoFile(file, sourceLabel = "") {
-  selectedUpdatePhotoFile = file || null;
-  if (!selectedUpdatePhotoFile) {
-    setUpdatePhotoStatus("");
-    return;
-  }
-
-  const label = sourceLabel ? ` (${sourceLabel})` : "";
-  setUpdatePhotoStatus(`Photo prete${label}: ${selectedUpdatePhotoFile.name}`, "success");
-}
-
-function clearSelectedUpdatePhotoFile() {
-  selectedUpdatePhotoFile = null;
-  if (updatePhotoInput) {
-    updatePhotoInput.value = "";
-  }
-  if (updatePhotoCameraInput) {
-    updatePhotoCameraInput.value = "";
-  }
-  setUpdatePhotoStatus("");
-}
-
-async function editUpdatePhotoFile(file, sourceLabel) {
-  if (!file) {
-    return;
-  }
-
-  const previous = selectedUpdatePhotoFile;
-  setUpdatePhotoStatus("Ouverture de l'editeur photo...");
-
-  try {
-    let editedFile = file;
-    if (window.PhotoEditor && typeof window.PhotoEditor.open === "function") {
-      editedFile = await window.PhotoEditor.open(file, { title: "Photo du suivi" });
+function getFirstSelectedFile(inputs) {
+  for (const input of inputs) {
+    const file = input?.files?.[0];
+    if (file) {
+      return file;
     }
-
-    if (!editedFile) {
-      if (previous) {
-        setSelectedUpdatePhotoFile(previous, "precedente conservee");
-      } else {
-        clearSelectedUpdatePhotoFile();
-        setUpdatePhotoStatus("Selection photo annulee.");
-      }
-      return;
-    }
-
-    setSelectedUpdatePhotoFile(editedFile, sourceLabel);
-  } catch (_error) {
-    if (previous) {
-      setSelectedUpdatePhotoFile(previous, "precedente conservee");
-      return;
-    }
-    clearSelectedUpdatePhotoFile();
-    setUpdatePhotoStatus("Impossible d'ouvrir l'editeur photo.", "error");
   }
+  return null;
 }
 
 async function getSignedPhotoUrl(path) {
@@ -162,7 +106,6 @@ function showOwnerUpdateForm() {
 function hideOwnerUpdateForm() {
   updateForm.classList.add("hidden");
   updateForm.hidden = true;
-  clearSelectedUpdatePhotoFile();
 }
 
 function applyUpdateModeFields() {
@@ -348,7 +291,7 @@ async function loadUpdates() {
 }
 
 async function uploadUpdatePhotoIfNeeded() {
-  const file = selectedUpdatePhotoFile;
+  const file = getFirstSelectedFile([updatePhotoCameraInput, updatePhotoInput]);
   if (!file) {
     return null;
   }
@@ -385,7 +328,7 @@ async function handleUpdateSubmit(event) {
   }
 
   const note = updateNoteInput.value.trim();
-  const hasPhoto = Boolean(selectedUpdatePhotoFile);
+  const hasPhoto = Boolean(getFirstSelectedFile([updatePhotoCameraInput, updatePhotoInput]));
   const resolved = resolveTrackingValues();
 
   if (resolved.error) {
@@ -432,7 +375,6 @@ async function handleUpdateSubmit(event) {
   }
 
   updateForm.reset();
-  clearSelectedUpdatePhotoFile();
   updateModeInput.value = "current_date";
   updateDateInput.value = getTodayIsoDate();
   updateWeekInput.value = String(semisRecord.current_week || resolved.weekNumber);
@@ -486,24 +428,16 @@ function attachEvents() {
   updateModeInput.addEventListener("change", applyUpdateModeFields);
 
   if (updatePhotoInput && updatePhotoCameraInput) {
-    updatePhotoInput.addEventListener("change", async () => {
-      const file = updatePhotoInput.files[0];
-      if (!file) {
-        return;
+    updatePhotoInput.addEventListener("change", () => {
+      if (updatePhotoInput.files[0]) {
+        updatePhotoCameraInput.value = "";
       }
-      updatePhotoCameraInput.value = "";
-      await editUpdatePhotoFile(file, "fichier");
-      updatePhotoInput.value = "";
     });
 
-    updatePhotoCameraInput.addEventListener("change", async () => {
-      const file = updatePhotoCameraInput.files[0];
-      if (!file) {
-        return;
+    updatePhotoCameraInput.addEventListener("change", () => {
+      if (updatePhotoCameraInput.files[0]) {
+        updatePhotoInput.value = "";
       }
-      updatePhotoInput.value = "";
-      await editUpdatePhotoFile(file, "camera");
-      updatePhotoCameraInput.value = "";
     });
   }
 
