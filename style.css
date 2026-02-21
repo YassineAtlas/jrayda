@@ -74,6 +74,30 @@ p {
   background-color: #4f7c4f;
 }
 
+.card-clickable {
+  cursor: pointer;
+}
+
+.card-clickable:focus-visible {
+  outline: 2px solid #6b9e6b;
+  outline-offset: 2px;
+}
+
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.card-actions .secondary-link {
+  background: #dde7d7;
+  color: #2f3e2f;
+}
+
+.card-actions .secondary-link:hover {
+  background: #cdd9ca;
+}
+
 /* ===== Images ===== */
 
 .main-image {
@@ -255,6 +279,10 @@ p {
   border: 1px solid #cdd9ca;
 }
 
+.panel input[readonly] {
+  background: #f2f7ef;
+}
+
 .panel button {
   border: none;
   background: #6b9e6b;
@@ -400,6 +428,15 @@ p {
 .update-date {
   font-size: 13px;
   color: #5f705f;
+}
+
+.semis-tab-header {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .plant-tabs {

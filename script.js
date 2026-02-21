@@ -31,9 +31,15 @@ function displayPlantList(plants) {
   plants.forEach(plant => {
 
     const imagePath = `images/${plant.id}/main.jpg`;
+    const sheetUrl = `plant.html?id=${plant.id}`;
+    const semisUrl = `plant.html?id=${plant.id}&tab=semis`;
 
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = "card card-clickable";
+    card.tabIndex = 0;
+    card.setAttribute("role", "link");
+    card.setAttribute("aria-label", `Ouvrir la fiche ${plant.general.name}`);
+    card.dataset.href = sheetUrl;
 
     card.innerHTML = `
       <img src="${imagePath}" alt="Aperçu" class="card-image">
@@ -45,8 +51,29 @@ function displayPlantList(plants) {
       <p><strong>Germination idéale :</strong> ${plant.germination.ideal_temp_c.min}-${plant.germination.ideal_temp_c.max} &deg;C</p>
       <p><strong>En stock :</strong> ${plant.general.in_stock ? "Oui" : "Non"}</p>
 
-      <a href="plant.html?id=${plant.id}">Voir fiche</a>
+      <div class="card-actions">
+        <a href="${sheetUrl}">Voir fiche</a>
+        <a href="${semisUrl}" class="secondary-link">Consulter les semis</a>
+      </div>
     `;
+
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("a, button, input, select, textarea, label")) {
+        return;
+      }
+      window.location.href = card.dataset.href;
+    });
+
+    card.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") {
+        return;
+      }
+      if (event.target.closest("a, button, input, select, textarea, label")) {
+        return;
+      }
+      event.preventDefault();
+      window.location.href = card.dataset.href;
+    });
 
     container.appendChild(card);
   });

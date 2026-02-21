@@ -2,6 +2,10 @@ const PHOTO_BUCKET = "semis-photos";
 
 const semisDetail = document.getElementById("semis-detail");
 const updateForm = document.getElementById("update-form");
+const updateModeInput = document.getElementById("update-mode");
+const updateDateWrap = document.getElementById("update-date-wrap");
+const updateDateInput = document.getElementById("update-date");
+const updateWeekWrap = document.getElementById("update-week-wrap");
 const updateWeekInput = document.getElementById("update-week");
 const updateNoteInput = document.getElementById("update-note");
 const updatePhotoInput = document.getElementById("update-photo");
@@ -32,11 +36,37 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-function formatDate(value) {
+function formatDateTime(value) {
   if (!value) {
     return "-";
   }
   return new Date(value).toLocaleString("fr-FR");
+}
+
+function formatDate(value) {
+  if (!value) {
+    return "-";
+  }
+  return new Date(`${value}T00:00:00`).toLocaleDateString("fr-FR");
+}
+
+function getTodayIsoDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function calculateWeekFromDate(sowingDate, eventDate) {
+  const sowing = new Date(`${sowingDate}T00:00:00`);
+  const event = new Date(`${eventDate}T00:00:00`);
+  if (Number.isNaN(sowing.getTime()) || Number.isNaN(event.getTime())) {
+    return 1;
+  }
+  const diffMs = event.getTime() - sowing.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return Math.max(1, Math.floor(diffDays / 7) + 1);
 }
 
 function parseSemisId() {
@@ -65,6 +95,76 @@ function showOwnerUpdateForm() {
 function hideOwnerUpdateForm() {
   updateForm.classList.add("hidden");
   updateForm.hidden = true;
+}
+
+function applyUpdateModeFields() {
+  const mode = updateModeInput.value;
+
+  if (mode === "custom_date") {
+    updateDateWrap.classList.remove("hidden");
+    updateDateWrap.hidden = false;
+    updateDateInput.required = true;
+
+    updateWeekWrap.classList.add("hidden");
+    updateWeekWrap.hidden = true;
+    updateWeekInput.required = false;
+    return;
+  }
+
+  if (mode === "custom_week") {
+    updateWeekWrap.classList.remove("hidden");
+    updateWeekWrap.hidden = false;
+    updateWeekInput.required = true;
+
+    updateDateWrap.classList.add("hidden");
+    updateDateWrap.hidden = true;
+    updateDateInput.required = false;
+    return;
+  }
+
+  updateDateWrap.classList.add("hidden");
+  updateDateWrap.hidden = true;
+  updateDateInput.required = false;
+
+  updateWeekWrap.classList.add("hidden");
+  updateWeekWrap.hidden = true;
+  updateWeekInput.required = false;
+}
+
+function resolveTrackingValues() {
+  const mode = updateModeInput.value;
+
+  if (mode === "current_date") {
+    const eventDate = getTodayIsoDate();
+    return {
+      weekNumber: calculateWeekFromDate(semisRecord.sowing_date, eventDate),
+      eventDate
+    };
+  }
+
+  if (mode === "custom_date") {
+    const eventDate = updateDateInput.value;
+    if (!eventDate) {
+      return { error: "Choisis une date de suivi." };
+    }
+    return {
+      weekNumber: calculateWeekFromDate(semisRecord.sowing_date, eventDate),
+      eventDate
+    };
+  }
+
+  if (mode === "custom_week") {
+    const weekNumber = Number(updateWeekInput.value);
+    if (!Number.isInteger(weekNumber) || weekNumber < 1) {
+      return { error: "La semaine doit etre >= 1." };
+    }
+    return {
+      weekNumber,
+      eventDate: null
+    };
+  }
+
+  return { error: "Mode de suivi invalide." };
 }
 
 async function renderSemisDetail() {
@@ -105,7 +205,10 @@ async function loadSemis() {
 
   if (isOwner) {
     showOwnerUpdateForm();
+    updateModeInput.value = "current_date";
+    updateDateInput.value = getTodayIsoDate();
     updateWeekInput.value = String(semisRecord.current_week || 1);
+    applyUpdateModeFields();
   } else {
     hideOwnerUpdateForm();
   }
@@ -127,7 +230,11 @@ async function renderUpdates() {
   updatesList.innerHTML = updatesCache
     .map((item, index) => {
       const week = Number(item.week_number) || 1;
-      const date = formatDate(item.created_at);
+      const addedAt = formatDateTime(item.created_at);
+      const trackedDate = item.event_date ? formatDate(item.event_date) : "";
+      const trackedLabel = trackedDate
+        ? `<p class="update-date">Date du suivi: ${escapeHtml(trackedDate)}</p>`
+        : '<p class="update-date">Date du suivi: semaine manuelle</p>';
       const photo = signedUrls[index]
         ? `<img class="seed-photo" src="${signedUrls[index]}" alt="Photo semaine ${week}">`
         : "";
@@ -139,7 +246,8 @@ async function renderUpdates() {
       return `
         <article class="update-card">
           <div class="seed-week-badge">Semaine ${week}</div>
-          <p class="update-date">Ajoute le ${escapeHtml(date)}</p>
+          ${trackedLabel}
+          <p class="update-date">Ajoute le ${escapeHtml(addedAt)}</p>
           ${photo}
           ${note}
           ${deleteBtn}
@@ -152,7 +260,7 @@ async function renderUpdates() {
 async function loadUpdates() {
   const { data, error } = await supabaseClient
     .from("semis_updates")
-    .select("id, semis_id, user_id, week_number, note, photo_path, created_at")
+    .select("id, semis_id, user_id, week_number, event_date, note, photo_path, created_at")
     .eq("semis_id", semisId)
     .order("week_number", { ascending: false })
     .order("created_at", { ascending: false });
@@ -203,12 +311,12 @@ async function handleUpdateSubmit(event) {
     return;
   }
 
-  const weekNumber = Number(updateWeekInput.value);
   const note = updateNoteInput.value.trim();
   const hasPhoto = Boolean(updatePhotoInput.files[0]);
+  const resolved = resolveTrackingValues();
 
-  if (!Number.isInteger(weekNumber) || weekNumber < 1) {
-    setMessage(updateMessage, "La semaine doit etre >= 1.", "error");
+  if (resolved.error) {
+    setMessage(updateMessage, resolved.error, "error");
     return;
   }
 
@@ -226,7 +334,8 @@ async function handleUpdateSubmit(event) {
   const { error } = await supabaseClient.from("semis_updates").insert({
     semis_id: semisId,
     user_id: currentUser.id,
-    week_number: weekNumber,
+    week_number: resolved.weekNumber,
+    event_date: resolved.eventDate,
     note: note || null,
     photo_path: uploadedPhotoPath
   });
@@ -236,21 +345,25 @@ async function handleUpdateSubmit(event) {
     return;
   }
 
-  if ((semisRecord.current_week || 1) !== weekNumber) {
+  if ((semisRecord.current_week || 1) !== resolved.weekNumber) {
     const { error: updateSemisError } = await supabaseClient
       .from("semis")
-      .update({ current_week: weekNumber })
+      .update({ current_week: resolved.weekNumber })
       .eq("id", semisId)
       .eq("user_id", currentUser.id);
 
     if (!updateSemisError) {
-      semisRecord.current_week = weekNumber;
+      semisRecord.current_week = resolved.weekNumber;
       await renderSemisDetail();
     }
   }
 
   updateForm.reset();
-  updateWeekInput.value = String(weekNumber);
+  updateModeInput.value = "current_date";
+  updateDateInput.value = getTodayIsoDate();
+  updateWeekInput.value = String(semisRecord.current_week || resolved.weekNumber);
+  applyUpdateModeFields();
+
   setMessage(updateMessage, "Suivi ajoute.", "success");
   await loadUpdates();
 }
@@ -264,6 +377,7 @@ async function handleDeleteUpdate(updateId) {
     setMessage(updateMessage, "Action non autorisee.", "error");
     return;
   }
+
   const update = getUpdateById(updateId);
   if (!update) {
     return;
@@ -295,6 +409,7 @@ async function handleDeleteUpdate(updateId) {
 
 function attachEvents() {
   updateForm.addEventListener("submit", handleUpdateSubmit);
+  updateModeInput.addEventListener("change", applyUpdateModeFields);
 
   updatesList.addEventListener("click", async (event) => {
     const button = event.target.closest("button[data-action='delete-update']");

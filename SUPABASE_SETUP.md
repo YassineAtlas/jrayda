@@ -4,7 +4,7 @@
 
 1. Cree un projet Supabase.
 2. Va dans `SQL Editor` et execute `supabase/schema.sql`.
-   - Si ton projet etait deja configure avant, re-execute ce fichier (il contient les migrations `plant_id`, `current_week` et `semis_updates`).
+   - Si ton projet etait deja configure avant, re-execute ce fichier (il contient aussi la migration `event_date` pour le suivi).
 3. Dans `Authentication > Providers > Email`, active:
    - `Enable Email Signup`
    - `Enable Email Confirmations`
@@ -47,9 +47,12 @@ Commit/push puis laisse GitHub Pages redeployer.
 4. Ensuite, connecte-toi avec `email + mot de passe` (sans lien email).
 5. Quand tu crees un semis:
    - choisis une plante existante (liste issue de `seeds.json`)
-   - renseigne la semaine actuelle du semis
-6. Ouvre un semis via `Ouvrir le semis` pour ajouter des photos/commentaires hebdomadaires.
-7. Dans `plant.html`, onglet `Semis` affiche les semis de la plante courante (acces famille uniquement).
+   - la semaine actuelle est calculee automatiquement depuis la date de semis (non modifiable a la creation)
+6. Ouvre un semis via `Ouvrir le semis` pour ajouter des photos/commentaires avec 3 modes:
+   - date actuelle
+   - date choisie
+   - semaine choisie
+7. Dans `plant.html`, onglet `Semis` affiche les semis de la plante courante et propose `Ajouter un semis de cette plante`.
 
 Regles appliquees:
 - Public: voit seulement les fiches plantes (`index.html`/`plant.html`).

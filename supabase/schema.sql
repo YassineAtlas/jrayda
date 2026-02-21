@@ -30,10 +30,13 @@ create table if not exists public.semis_updates (
   semis_id uuid not null references public.semis(id) on delete cascade,
   user_id uuid not null references auth.users(id) on delete cascade,
   week_number integer not null check (week_number >= 1),
+  event_date date,
   note text,
   photo_path text,
   created_at timestamptz not null default now()
 );
+
+alter table public.semis_updates add column if not exists event_date date;
 
 create index if not exists semis_plant_id_idx on public.semis(plant_id);
 create index if not exists semis_updates_semis_id_idx on public.semis_updates(semis_id);

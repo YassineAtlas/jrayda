@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Espace famille</title>
-  <link rel="stylesheet" href="style.css?v=20260221-4">
+  <link rel="stylesheet" href="style.css?v=20260221-5">
 </head>
 <body>
   <header class="site-header">
@@ -61,8 +61,8 @@
           <label for="seed-date">Date de semis</label>
           <input type="date" id="seed-date" required>
 
-          <label for="current-week">Semaine actuelle du semis</label>
-          <input type="number" id="current-week" min="1" step="1" value="1" required>
+          <label for="current-week">Semaine actuelle du semis (automatique)</label>
+          <input type="number" id="current-week" min="1" step="1" value="1" readonly>
 
           <label for="seed-location">Emplacement</label>
           <input type="text" id="seed-location" required placeholder="Serre, balcon, potager...">
@@ -97,7 +97,7 @@
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js?v=20260221-4"></script>
-  <script src="famille.js?v=20260221-4"></script>
+  <script src="supabase-config.js?v=20260221-5"></script>
+  <script src="famille.js?v=20260221-5"></script>
 </body>
 </html>

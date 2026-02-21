@@ -35,6 +35,7 @@ let supabaseClient = null;
 let currentUser = null;
 let seedCache = [];
 let plantCatalog = [];
+let prefillPlantId = "";
 
 function setMessage(element, text, type = "") {
   element.textContent = text || "";
@@ -67,6 +68,15 @@ function formatDateForDisplay(dateValue) {
 
 function getRedirectUrl() {
   return `${window.location.origin}${window.location.pathname}`;
+}
+
+function getPrefillPlantIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const id = Number(params.get("plant_id"));
+  if (!Number.isInteger(id) || id <= 0) {
+    return "";
+  }
+  return String(id);
 }
 
 function calculateCurrentWeek(sowingDate) {
@@ -132,6 +142,9 @@ function resetSeedForm() {
   cancelEditBtn.classList.add("hidden");
   cancelEditBtn.hidden = true;
   currentWeekInput.value = "1";
+  if (prefillPlantId) {
+    plantSelectInput.value = prefillPlantId;
+  }
 }
 
 function getPlantNameById(plantId) {
@@ -167,6 +180,9 @@ async function loadPlantCatalog() {
     name: plant?.general?.name || plant?.general?.plant_name || `Plante #${plant.id}`
   }));
   populatePlantOptions();
+  if (prefillPlantId) {
+    plantSelectInput.value = prefillPlantId;
+  }
 }
 
 async function getSignedPhotoUrl(path) {
@@ -385,9 +401,9 @@ async function handleSeedSubmit(event) {
   const plantName = getPlantNameById(plantId);
   const sowingDate = seedDateInput.value;
   const location = seedLocationInput.value.trim();
-  const currentWeek = Number(currentWeekInput.value);
+  const calculatedCurrentWeek = calculateCurrentWeek(sowingDate);
 
-  if (!plantId || !plantName || !sowingDate || !location || !Number.isInteger(currentWeek) || currentWeek < 1) {
+  if (!plantId || !plantName || !sowingDate || !location) {
     setMessage(seedMessage, "Complete tous les champs obligatoires.", "error");
     return;
   }
@@ -413,7 +429,7 @@ async function handleSeedSubmit(event) {
     plant_id: plantId,
     plant_name: plantName,
     sowing_date: sowingDate,
-    current_week: currentWeek,
+    current_week: isEdit ? Number(existingSeed.current_week) || 1 : calculatedCurrentWeek,
     location,
     photo_path: photoPath
   };
@@ -595,6 +611,8 @@ async function init() {
     setMessage(authMessage, "Configuration Supabase manquante dans supabase-config.js", "error");
     return;
   }
+
+  prefillPlantId = getPrefillPlantIdFromUrl();
 
   supabaseClient = window.supabase.createClient(
     window.SUPABASE_URL,

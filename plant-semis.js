@@ -10,6 +10,21 @@ function getPlantIdFromUrl() {
   return Number(params.get("id"));
 }
 
+function shouldOpenSemisTabByDefault() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("tab") === "semis";
+}
+
+function syncTabInUrl(tabName) {
+  const url = new URL(window.location.href);
+  if (tabName === "semis") {
+    url.searchParams.set("tab", "semis");
+  } else {
+    url.searchParams.delete("tab");
+  }
+  window.history.replaceState({}, "", url.toString());
+}
+
 function escapeHtml(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -26,6 +41,20 @@ function formatDate(value) {
   return new Date(`${value}T00:00:00`).toLocaleDateString("fr-FR");
 }
 
+function renderSemisTabIntro({ plantId, showAddButton }) {
+  const addButton = showAddButton
+    ? `<a class="seed-open-link" href="famille.html?plant_id=${plantId}">Ajouter un semis de cette plante</a>`
+    : "";
+
+  return `
+    <div class="semis-tab-header">
+      <p>Historique des semis pour cette plante.</p>
+      ${addButton}
+    </div>
+    <div id="plant-semis-list"></div>
+  `;
+}
+
 function showSheetTab() {
   tabSheetBtn.classList.add("active");
   tabSemisBtn.classList.remove("active");
@@ -33,6 +62,7 @@ function showSheetTab() {
   plantDetailContainer.hidden = false;
   plantSemisContainer.classList.add("hidden");
   plantSemisContainer.hidden = true;
+  syncTabInUrl("sheet");
 }
 
 function showSemisTab() {
@@ -42,15 +72,21 @@ function showSemisTab() {
   plantSemisContainer.hidden = false;
   plantDetailContainer.classList.add("hidden");
   plantDetailContainer.hidden = true;
+  syncTabInUrl("semis");
 }
 
 function renderSemisCards(rows, signedUrls) {
-  if (!rows.length) {
-    plantSemisContainer.innerHTML = "<p>Aucun semis enregistre pour cette plante.</p>";
+  const list = document.getElementById("plant-semis-list");
+  if (!list) {
     return;
   }
 
-  plantSemisContainer.innerHTML = rows
+  if (!rows.length) {
+    list.innerHTML = "<p>Aucun semis enregistre pour cette plante.</p>";
+    return;
+  }
+
+  list.innerHTML = rows
     .map((row, index) => {
       const week = Number(row.current_week) || 1;
       const photo = signedUrls[index]
@@ -89,13 +125,19 @@ async function loadSemisTab() {
     window.SUPABASE_ANON_KEY
   );
 
-  plantSemisContainer.innerHTML = "<p>Chargement des semis...</p>";
+  plantSemisContainer.innerHTML = renderSemisTabIntro({ plantId, showAddButton: false });
+  const list = document.getElementById("plant-semis-list");
+  if (list) {
+    list.innerHTML = "<p>Chargement des semis...</p>";
+  }
 
   const { data: sessionData } = await supabaseClient.auth.getSession();
   const session = sessionData?.session || null;
   if (!session) {
-    plantSemisContainer.innerHTML =
-      '<p>Connecte-toi dans <a href="famille.html">Espace famille</a> pour voir les semis de cette plante.</p>';
+    if (list) {
+      list.innerHTML =
+        `<p>Connecte-toi dans <a href="famille.html?plant_id=${plantId}">Espace famille</a> pour voir et ajouter les semis de cette plante.</p>`;
+    }
     return;
   }
 
@@ -106,9 +148,13 @@ async function loadSemisTab() {
     .maybeSingle();
 
   if (!membership) {
-    plantSemisContainer.innerHTML = "<p>Acces reserve aux membres de la famille.</p>";
+    if (list) {
+      list.innerHTML = "<p>Acces reserve aux membres de la famille.</p>";
+    }
     return;
   }
+
+  plantSemisContainer.innerHTML = renderSemisTabIntro({ plantId, showAddButton: true });
 
   const { data: rows, error } = await supabaseClient
     .from("semis")
@@ -117,7 +163,10 @@ async function loadSemisTab() {
     .order("sowing_date", { ascending: false });
 
   if (error) {
-    plantSemisContainer.innerHTML = `<p>Erreur: ${escapeHtml(error.message)}</p>`;
+    const listAfterError = document.getElementById("plant-semis-list");
+    if (listAfterError) {
+      listAfterError.innerHTML = `<p>Erreur: ${escapeHtml(error.message)}</p>`;
+    }
     return;
   }
 
@@ -136,6 +185,14 @@ async function loadSemisTab() {
   renderSemisCards(rows || [], signedUrls);
 }
 
+async function openSemisTab() {
+  showSemisTab();
+  if (!plantSemisLoaded) {
+    plantSemisLoaded = true;
+    await loadSemisTab();
+  }
+}
+
 function initTabs() {
   if (!tabSheetBtn || !tabSemisBtn || !plantSemisContainer || !plantDetailContainer) {
     return;
@@ -145,12 +202,12 @@ function initTabs() {
 
   tabSheetBtn.addEventListener("click", showSheetTab);
   tabSemisBtn.addEventListener("click", async () => {
-    showSemisTab();
-    if (!plantSemisLoaded) {
-      plantSemisLoaded = true;
-      await loadSemisTab();
-    }
+    await openSemisTab();
   });
+
+  if (shouldOpenSemisTabByDefault()) {
+    openSemisTab();
+  }
 }
 
 initTabs();
