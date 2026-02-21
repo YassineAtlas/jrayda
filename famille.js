@@ -28,6 +28,7 @@ const currentWeekInput = document.getElementById("current-week");
 const seedLocationInput = document.getElementById("seed-location");
 const seedPhotoInput = document.getElementById("seed-photo");
 const seedPhotoCameraInput = document.getElementById("seed-photo-camera");
+const seedPhotoStatus = document.getElementById("seed-photo-status");
 const saveBtn = document.getElementById("save-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const seedList = document.getElementById("seed-list");
@@ -37,6 +38,7 @@ let currentUser = null;
 let seedCache = [];
 let plantCatalog = [];
 let prefillPlantId = "";
+let selectedSeedPhotoFile = null;
 
 function setMessage(element, text, type = "") {
   element.textContent = text || "";
@@ -88,14 +90,68 @@ function getPrefillPlantIdFromUrl() {
   return String(id);
 }
 
-function getFirstSelectedFile(inputs) {
-  for (const input of inputs) {
-    const file = input?.files?.[0];
-    if (file) {
-      return file;
-    }
+function setSeedPhotoStatus(text, type = "") {
+  if (!seedPhotoStatus) {
+    return;
   }
-  return null;
+  setMessage(seedPhotoStatus, text, type);
+}
+
+function setSelectedSeedPhotoFile(file, sourceLabel = "") {
+  selectedSeedPhotoFile = file || null;
+  if (!selectedSeedPhotoFile) {
+    setSeedPhotoStatus("");
+    return;
+  }
+
+  const label = sourceLabel ? ` (${sourceLabel})` : "";
+  setSeedPhotoStatus(`Photo prete${label}: ${selectedSeedPhotoFile.name}`, "success");
+}
+
+function clearSelectedSeedPhotoFile() {
+  selectedSeedPhotoFile = null;
+  if (seedPhotoInput) {
+    seedPhotoInput.value = "";
+  }
+  if (seedPhotoCameraInput) {
+    seedPhotoCameraInput.value = "";
+  }
+  setSeedPhotoStatus("");
+}
+
+async function editSeedPhotoFile(file, sourceLabel) {
+  if (!file) {
+    return;
+  }
+
+  const previous = selectedSeedPhotoFile;
+  setSeedPhotoStatus("Ouverture de l'editeur photo...");
+
+  try {
+    let editedFile = file;
+    if (window.PhotoEditor && typeof window.PhotoEditor.open === "function") {
+      editedFile = await window.PhotoEditor.open(file, { title: "Photo du semis" });
+    }
+
+    if (!editedFile) {
+      if (previous) {
+        setSelectedSeedPhotoFile(previous, "precedente conservee");
+      } else {
+        clearSelectedSeedPhotoFile();
+        setSeedPhotoStatus("Selection photo annulee.");
+      }
+      return;
+    }
+
+    setSelectedSeedPhotoFile(editedFile, sourceLabel);
+  } catch (_error) {
+    if (previous) {
+      setSelectedSeedPhotoFile(previous, "precedente conservee");
+      return;
+    }
+    clearSelectedSeedPhotoFile();
+    setSeedPhotoStatus("Impossible d'ouvrir l'editeur photo.", "error");
+  }
 }
 
 function calculateCurrentWeek(sowingDate) {
@@ -161,6 +217,7 @@ function resetSeedForm() {
   cancelEditBtn.classList.add("hidden");
   cancelEditBtn.hidden = true;
   currentWeekInput.value = "1";
+  clearSelectedSeedPhotoFile();
   if (prefillPlantId) {
     plantSelectInput.value = prefillPlantId;
   }
@@ -328,8 +385,8 @@ async function applySession(session) {
   await loadSeeds();
 }
 
-async function uploadPhotoIfNeeded(fileInputs) {
-  const file = getFirstSelectedFile(fileInputs);
+async function uploadPhotoIfNeeded() {
+  const file = selectedSeedPhotoFile;
   if (!file) {
     return null;
   }
@@ -468,7 +525,7 @@ async function handleSeedSubmit(event) {
   setMessage(seedMessage, "Enregistrement...");
 
   let photoPath = existingSeed?.photo_path || null;
-  const uploadedPhotoPath = await uploadPhotoIfNeeded([seedPhotoCameraInput, seedPhotoInput]);
+  const uploadedPhotoPath = await uploadPhotoIfNeeded();
   if (uploadedPhotoPath === false) {
     return;
   }
@@ -629,16 +686,24 @@ function attachEvents() {
   });
 
   if (seedPhotoInput && seedPhotoCameraInput) {
-    seedPhotoInput.addEventListener("change", () => {
-      if (seedPhotoInput.files[0]) {
-        seedPhotoCameraInput.value = "";
+    seedPhotoInput.addEventListener("change", async () => {
+      const file = seedPhotoInput.files[0];
+      if (!file) {
+        return;
       }
+      seedPhotoCameraInput.value = "";
+      await editSeedPhotoFile(file, "fichier");
+      seedPhotoInput.value = "";
     });
 
-    seedPhotoCameraInput.addEventListener("change", () => {
-      if (seedPhotoCameraInput.files[0]) {
-        seedPhotoInput.value = "";
+    seedPhotoCameraInput.addEventListener("change", async () => {
+      const file = seedPhotoCameraInput.files[0];
+      if (!file) {
+        return;
       }
+      seedPhotoInput.value = "";
+      await editSeedPhotoFile(file, "camera");
+      seedPhotoCameraInput.value = "";
     });
   }
 

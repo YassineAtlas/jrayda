@@ -299,6 +299,196 @@ p {
   overflow: hidden;
 }
 
+.mobile-camera-only {
+  display: none;
+}
+
+.camera-input-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.camera-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #6b9e6b;
+  background: #e8efe6;
+  color: #2d5a2d;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.camera-trigger.mobile-camera-only {
+  display: none;
+}
+
+.camera-trigger:hover {
+  background: #dde7d7;
+}
+
+.photo-input-status {
+  min-height: 18px;
+  margin-top: -4px;
+  margin-bottom: 2px;
+  font-size: 13px;
+  color: #5f705f;
+}
+
+.photo-input-status.error {
+  color: #8e2f2f;
+}
+
+.photo-input-status.success {
+  color: #2d5a2d;
+}
+
+body.photo-editor-open {
+  overflow: hidden;
+}
+
+.photo-editor-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(22, 32, 22, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 14px;
+}
+
+.photo-editor-modal {
+  width: min(1000px, 100%);
+  max-height: 95vh;
+  overflow: auto;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #d5e1d2;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.24);
+  padding: 14px;
+}
+
+.photo-editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.photo-editor-head h3 {
+  margin: 0;
+  color: #2d5a2d;
+}
+
+.photo-editor-close {
+  width: auto;
+  border: 0;
+  background: #dde7d7;
+  color: #2f3e2f;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.photo-editor-toolbar {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.photo-editor-toolbar button {
+  width: auto;
+  border: 1px solid #cdd9ca;
+  background: #f2f7ef;
+  color: #2f3e2f;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.photo-editor-toolbar button.active {
+  background: #6b9e6b;
+  color: #ffffff;
+  border-color: #6b9e6b;
+}
+
+.photo-editor-range-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #cdd9ca;
+  border-radius: 8px;
+  color: #2f3e2f;
+}
+
+.photo-editor-range-wrap input {
+  width: 120px;
+}
+
+.photo-editor-hint {
+  margin: 10px 0;
+  color: #4a5c4a;
+  font-size: 14px;
+}
+
+.photo-editor-canvas-wrap {
+  position: relative;
+  border: 1px solid #d5e1d2;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f4f7f2;
+}
+
+.photo-editor-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  max-height: 64vh;
+  object-fit: contain;
+  touch-action: none;
+}
+
+#photo-editor-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.photo-editor-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.photo-editor-actions button {
+  width: auto;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.photo-editor-actions .secondary {
+  background: #dde7d7;
+  color: #2f3e2f;
+}
+
+.photo-editor-actions button:not(.secondary) {
+  background: #6b9e6b;
+  color: #ffffff;
+}
+
 .panel input[readonly] {
   background: #f2f7ef;
 }
@@ -484,6 +674,14 @@ p {
 }
 
 @media (max-width: 768px) {
+  .mobile-camera-only {
+    display: block;
+  }
+
+  .camera-trigger.mobile-camera-only {
+    display: inline-flex;
+  }
+
   .site-nav {
     flex-direction: column;
     align-items: flex-start;
@@ -505,5 +703,31 @@ p {
 
   .updates-list {
     grid-template-columns: 1fr;
+  }
+
+  .photo-editor-modal {
+    padding: 12px;
+  }
+
+  .photo-editor-toolbar {
+    gap: 6px;
+  }
+
+  .photo-editor-toolbar button,
+  .photo-editor-range-wrap {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .photo-editor-range-wrap input {
+    width: 100%;
+  }
+
+  .photo-editor-actions {
+    flex-direction: column;
+  }
+
+  .photo-editor-actions button {
+    width: 100%;
   }
 }
