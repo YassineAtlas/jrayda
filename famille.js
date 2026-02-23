@@ -107,6 +107,23 @@ function getFirstSelectedFile(inputs) {
   return null;
 }
 
+async function withUploadTimeout(promise, timeoutMs, timeoutMessage) {
+  let timeoutId = null;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = window.setTimeout(() => {
+      reject(new Error(timeoutMessage));
+    }, timeoutMs);
+  });
+
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    if (timeoutId !== null) {
+      window.clearTimeout(timeoutId);
+    }
+  }
+}
+
 function clearSeedProgressHideTimer() {
   if (seedProgressHideTimer === null) {
     return;
@@ -492,14 +509,40 @@ async function uploadPhotoIfNeeded(fileInputs) {
     return null;
   }
 
-  const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
+  const isCameraCapture = Boolean(seedPhotoCameraInput?.files?.[0] && file === seedPhotoCameraInput.files[0]);
+  const mimeType = file.type || "image/jpeg";
+  const originalName = file.name || (isCameraCapture ? `camera-${Date.now()}.jpg` : "photo.jpg");
+  const safeName = originalName.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
   const path = `${currentUser.id}/${Date.now()}-${safeName}`;
-  const { error } = await supabaseClient.storage.from(PHOTO_BUCKET).upload(path, file, {
-    upsert: false,
-    contentType: file.type || "image/jpeg"
-  });
+  let uploadBody = file;
 
-  if (error) {
+  // Mobile camera captures can fail with direct File upload on some browsers.
+  if (isCameraCapture) {
+    try {
+      const copiedBuffer = await file.arrayBuffer();
+      uploadBody = new Blob([copiedBuffer], { type: mimeType });
+    } catch (error) {
+      setMessage(seedMessage, `Lecture photo impossible: ${error.message || "fichier invalide"}`, "error");
+      return false;
+    }
+  }
+
+  try {
+    const uploadPromise = supabaseClient.storage.from(PHOTO_BUCKET).upload(path, uploadBody, {
+      upsert: false,
+      contentType: mimeType
+    });
+    const { error } = await withUploadTimeout(
+      uploadPromise,
+      60 * 1000,
+      "Upload trop long. Verifie la connexion et reessaie."
+    );
+
+    if (error) {
+      setMessage(seedMessage, `Upload photo impossible: ${error.message}`, "error");
+      return false;
+    }
+  } catch (error) {
     setMessage(seedMessage, `Upload photo impossible: ${error.message}`, "error");
     return false;
   }
