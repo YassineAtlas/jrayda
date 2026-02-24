@@ -43,6 +43,37 @@ function formatDate(value) {
   return new Date(`${value}T00:00:00`).toLocaleDateString("fr-FR");
 }
 
+function getTodayIsoDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function calculateDaysSinceDate(dateValue, referenceDate = getTodayIsoDate()) {
+  if (!dateValue) {
+    return null;
+  }
+  const start = new Date(`${dateValue}T00:00:00`);
+  const end = new Date(`${referenceDate}T00:00:00`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return null;
+  }
+  const diffMs = end.getTime() - start.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
+function formatWeekWithDays(weekNumber, sowingDate) {
+  const week = Number(weekNumber) || 1;
+  const days = calculateDaysSinceDate(sowingDate);
+  if (!Number.isInteger(days)) {
+    return `Semaine ${week}`;
+  }
+  return `Semaine ${week} (${days}J)`;
+}
+
 function ensurePhotoLightbox() {
   if (photoLightbox && photoLightboxImage) {
     return;
@@ -148,6 +179,7 @@ function renderSemisCards(rows, signedUrls) {
   list.innerHTML = rows
     .map((row, index) => {
       const week = Number(row.current_week) || 1;
+      const weekLabel = formatWeekWithDays(week, row.sowing_date);
       const photo = signedUrls[index]
         ? `<img class="seed-photo" src="${signedUrls[index]}" alt="Semis">`
         : "";
@@ -155,7 +187,7 @@ function renderSemisCards(rows, signedUrls) {
       return `
         <article class="seed-card">
           ${photo}
-          <div class="seed-week-badge">Semaine ${week}</div>
+          <div class="seed-week-badge">${escapeHtml(weekLabel)}</div>
           <h3>${escapeHtml(row.plant_name || "Plante")}</h3>
           <p><strong>Date semis:</strong> ${escapeHtml(formatDate(row.sowing_date))}</p>
           <p><strong>Emplacement:</strong> ${escapeHtml(row.location || "-")}</p>

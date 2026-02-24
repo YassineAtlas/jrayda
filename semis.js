@@ -10,7 +10,6 @@ const updateWeekWrap = document.getElementById("update-week-wrap");
 const updateWeekInput = document.getElementById("update-week");
 const updateNoteInput = document.getElementById("update-note");
 const updatePhotoInput = document.getElementById("update-photo");
-const updatePhotoCameraInput = document.getElementById("update-photo-camera");
 const updatePhotoSelected = document.getElementById("update-photo-selected");
 const updateProgress = document.getElementById("update-progress");
 const updateProgressBar = document.getElementById("update-progress-bar");
@@ -88,19 +87,47 @@ function calculateWeekFromDate(sowingDate, eventDate) {
   return Math.max(1, Math.floor(diffDays / 7) + 1);
 }
 
+function calculateDaysSinceSowing(sowingDate, eventDate = getTodayIsoDate()) {
+  if (!sowingDate || !eventDate) {
+    return null;
+  }
+  const sowing = new Date(`${sowingDate}T00:00:00`);
+  const event = new Date(`${eventDate}T00:00:00`);
+  if (Number.isNaN(sowing.getTime()) || Number.isNaN(event.getTime())) {
+    return null;
+  }
+  const diffMs = event.getTime() - sowing.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
+function formatWeekWithDays(weekNumber, sowingDate, eventDate = getTodayIsoDate()) {
+  const week = Number(weekNumber) || 1;
+  const days = calculateDaysSinceSowing(sowingDate, eventDate);
+  if (!Number.isInteger(days)) {
+    return `Semaine ${week}`;
+  }
+  return `Semaine ${week} (${days}J)`;
+}
+
 function parseSemisId() {
   const params = new URLSearchParams(window.location.search);
   return params.get("id") || "";
 }
 
-function getFirstSelectedFile(inputs) {
-  for (const input of inputs) {
-    const file = input?.files?.[0];
-    if (file) {
-      return file;
-    }
+function getSelectedUpdatePhoto() {
+  const pickerFile = updatePhotoInput?.files?.[0];
+  if (pickerFile) {
+    return {
+      file: pickerFile,
+      isCameraCapture: false
+    };
   }
-  return null;
+
+  return {
+    file: null,
+    isCameraCapture: false
+  };
 }
 
 async function withUploadTimeout(promise, timeoutMs, timeoutMessage) {
@@ -120,6 +147,189 @@ async function withUploadTimeout(promise, timeoutMs, timeoutMessage) {
   }
 }
 
+function getUploadTimeoutMs(fileSizeBytes) {
+  const minTimeoutMs = 12 * 1000;
+  const maxTimeoutMs = 75 * 1000;
+  const assumedUploadSpeedBytesPerSecond = 256 * 1024;
+  const computedMs = Math.ceil((Number(fileSizeBytes || 0) / assumedUploadSpeedBytesPerSecond) * 1000) + 8 * 1000;
+  return Math.max(minTimeoutMs, Math.min(maxTimeoutMs, computedMs));
+}
+
+async function createStableUploadBlob(file, mimeType) {
+  const copiedBuffer = await file.arrayBuffer();
+  return new Blob([copiedBuffer], { type: mimeType });
+}
+
+async function downscaleImageBlob(blob, options = {}) {
+  const maxSide = Number(options.maxSide) || 1600;
+  const quality = Number(options.quality) || 0.72;
+
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(blob);
+    const image = new Image();
+
+    image.onload = () => {
+      try {
+        const srcWidth = image.naturalWidth || image.width;
+        const srcHeight = image.naturalHeight || image.height;
+        if (!srcWidth || !srcHeight) {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Dimensions image invalides."));
+          return;
+        }
+
+        const ratio = Math.min(1, maxSide / Math.max(srcWidth, srcHeight));
+        const targetWidth = Math.max(1, Math.round(srcWidth * ratio));
+        const targetHeight = Math.max(1, Math.round(srcHeight * ratio));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Canvas indisponible."));
+          return;
+        }
+
+        context.drawImage(image, 0, 0, targetWidth, targetHeight);
+        canvas.toBlob(
+          (result) => {
+            URL.revokeObjectURL(objectUrl);
+            if (!result) {
+              reject(new Error("Conversion image impossible."));
+              return;
+            }
+            resolve(result);
+          },
+          "image/jpeg",
+          quality
+        );
+      } catch (error) {
+        URL.revokeObjectURL(objectUrl);
+        reject(error);
+      }
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Lecture image impossible."));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+async function buildOptimizedUploadBody(file, mimeType) {
+  const stableBlob = await createStableUploadBlob(file, mimeType);
+  if (!mimeType.startsWith("image/")) {
+    return {
+      uploadBody: stableBlob,
+      contentType: mimeType
+    };
+  }
+
+  try {
+    const optimizedBlob = await downscaleImageBlob(stableBlob, {
+      maxSide: 1600,
+      quality: 0.72
+    });
+    return {
+      uploadBody: optimizedBlob,
+      contentType: "image/jpeg"
+    };
+  } catch (_error) {
+    return {
+      uploadBody: stableBlob,
+      contentType: mimeType
+    };
+  }
+}
+
+async function uploadBlobWithStorageRest(path, uploadBody, mimeType, timeoutMs) {
+  if (!supabaseClient || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    return {
+      error: {
+        message: "Configuration Supabase manquante."
+      }
+    };
+  }
+
+  const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+  if (sessionError) {
+    return {
+      error: {
+        message: sessionError.message || "Session utilisateur invalide."
+      }
+    };
+  }
+
+  const accessToken = sessionData?.session?.access_token;
+  if (!accessToken) {
+    return {
+      error: {
+        message: "Session expiree. Reconnecte-toi."
+      }
+    };
+  }
+
+  const encodedPath = String(path || "")
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  const endpoint = `${window.SUPABASE_URL}/storage/v1/object/${PHOTO_BUCKET}/${encodedPath}`;
+
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", endpoint, true);
+    xhr.timeout = Math.max(30000, Number(timeoutMs) || 0);
+    xhr.setRequestHeader("apikey", window.SUPABASE_ANON_KEY);
+    xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+    xhr.setRequestHeader("x-upsert", "true");
+    if (mimeType) {
+      xhr.setRequestHeader("Content-Type", mimeType);
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve({ error: null });
+        return;
+      }
+
+      let message = `HTTP ${xhr.status}`;
+      try {
+        const parsed = JSON.parse(xhr.responseText || "{}");
+        message = parsed.message || parsed.error || parsed.msg || message;
+      } catch (_error) {
+        // Keep generic message when response is not JSON.
+      }
+      resolve({
+        error: {
+          message
+        }
+      });
+    };
+
+    xhr.onerror = () => {
+      resolve({
+        error: {
+          message: "Erreur reseau pendant upload REST."
+        }
+      });
+    };
+
+    xhr.ontimeout = () => {
+      resolve({
+        error: {
+          message: "Upload REST trop long. Verifie la connexion et reessaie."
+        }
+      });
+    };
+
+    xhr.send(uploadBody);
+  });
+}
+
 function clearUpdateProgressHideTimer() {
   if (updateProgressHideTimer === null) {
     return;
@@ -137,16 +347,14 @@ function setUpdatePhotoSelectedText(text, isSelected = false) {
 }
 
 function updatePhotoSelectionText() {
-  const file = getFirstSelectedFile([updatePhotoCameraInput, updatePhotoInput]);
+  const file = updatePhotoInput?.files?.[0] || null;
   if (!file) {
     setUpdatePhotoSelectedText("Aucune photo selectionnee.");
     return;
   }
 
-  const fromCamera = Boolean(updatePhotoCameraInput?.files?.[0]);
-  const sourceLabel = fromCamera ? "camera" : "fichier";
   const fileName = file.name || "image.jpg";
-  setUpdatePhotoSelectedText(`Photo ${sourceLabel}: ${fileName}`, true);
+  setUpdatePhotoSelectedText(`Photo fichier: ${fileName}`, true);
 }
 
 function setUpdateFormSavingState(isSaving) {
@@ -155,7 +363,6 @@ function setUpdateFormSavingState(isSaving) {
   updateWeekInput.disabled = isSaving;
   updateNoteInput.disabled = isSaving;
   updatePhotoInput.disabled = isSaving;
-  updatePhotoCameraInput.disabled = isSaving;
   const submitBtn = updateForm.querySelector("button[type='submit']");
   if (submitBtn) {
     submitBtn.disabled = isSaving;
@@ -368,9 +575,11 @@ async function renderSemisDetail() {
     ? `<a class="seed-open-link seed-action-button" href="plant.html?id=${semisRecord.plant_id}">Voir fiche plante</a>`
     : "";
 
+  const weekLabel = formatWeekWithDays(semisRecord.current_week || 1, semisRecord.sowing_date);
+
   semisDetail.innerHTML = `
     ${photoHtml}
-    <div class="seed-week-badge">Semaine ${semisRecord.current_week || 1}</div>
+    <div class="seed-week-badge">${escapeHtml(weekLabel)}</div>
     <h3>${escapeHtml(semisRecord.plant_name || "Plante")}</h3>
     <p><strong>Date semis:</strong> ${escapeHtml(semisRecord.sowing_date || "-")}</p>
     <p><strong>Emplacement:</strong> ${escapeHtml(semisRecord.location || "-")}</p>
@@ -522,6 +731,12 @@ async function renderUpdates() {
   updatesList.innerHTML = updatesCache
     .map((item, index) => {
       const week = Number(item.week_number) || 1;
+      const days = item.event_date
+        ? calculateDaysSinceSowing(semisRecord?.sowing_date, item.event_date)
+        : Math.max(0, (week - 1) * 7);
+      const weekLabel = Number.isInteger(days)
+        ? `Semaine ${week} (${days}J)`
+        : `Semaine ${week}`;
       const addedAt = formatDateTime(item.created_at);
       const trackedDate = item.event_date ? formatDate(item.event_date) : "";
       const trackedLabel = trackedDate
@@ -537,7 +752,7 @@ async function renderUpdates() {
 
       return `
         <article class="update-card">
-          <div class="seed-week-badge">Semaine ${week}</div>
+          <div class="seed-week-badge">${escapeHtml(weekLabel)}</div>
           ${trackedLabel}
           <p class="update-date">Ajoute le ${escapeHtml(addedAt)}</p>
           ${photo}
@@ -566,56 +781,84 @@ async function loadUpdates() {
   await renderUpdates();
 }
 
-async function uploadUpdatePhotoIfNeeded() {
-  const file = getFirstSelectedFile([updatePhotoCameraInput, updatePhotoInput]);
+async function uploadUpdatePhotoIfNeeded(selectedPhoto) {
+  const file = selectedPhoto?.file || null;
   if (!file) {
     return null;
   }
 
-  const isCameraCapture = Boolean(
-    updatePhotoCameraInput?.files?.[0] && file === updatePhotoCameraInput.files[0]
-  );
-  const mimeType = file.type || "image/jpeg";
-  const originalName = file.name || (isCameraCapture ? `camera-${Date.now()}.jpg` : "photo.jpg");
+  const sourceMimeType = selectedPhoto?.mimeType || file.type || "image/jpeg";
+  const originalName = selectedPhoto?.fileName || file.name || "photo.jpg";
   const safeName = originalName.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
   const path = `${currentUser.id}/updates/${Date.now()}-${safeName}`;
-  let uploadBody = file;
-
-  if (isCameraCapture) {
-    try {
-      const copiedBuffer = await file.arrayBuffer();
-      uploadBody = new Blob([copiedBuffer], { type: mimeType });
-    } catch (error) {
-      setMessage(
-        updateMessage,
-        `Lecture photo impossible: ${error.message || "fichier invalide"}`,
-        "error"
-      );
-      return false;
-    }
-  }
+  let optimizedUpload = null;
 
   try {
-    const uploadPromise = supabaseClient.storage.from(PHOTO_BUCKET).upload(path, uploadBody, {
-      upsert: false,
-      contentType: mimeType
-    });
-    const { error } = await withUploadTimeout(
-      uploadPromise,
-      60 * 1000,
-      "Upload trop long. Verifie la connexion et reessaie."
-    );
-
-    if (error) {
-      setMessage(updateMessage, `Upload photo impossible: ${error.message}`, "error");
-      return false;
-    }
+    optimizedUpload = await buildOptimizedUploadBody(file, sourceMimeType);
   } catch (error) {
-    setMessage(updateMessage, `Upload photo impossible: ${error.message}`, "error");
+    setMessage(
+      updateMessage,
+      `Lecture photo impossible: ${error.message || "fichier invalide"}`,
+      "error"
+    );
     return false;
   }
 
-  return path;
+  const optimizedBody = optimizedUpload.uploadBody;
+  const optimizedType = optimizedUpload.contentType || sourceMimeType;
+  const optimizedTimeoutMs = getUploadTimeoutMs(optimizedBody.size || file.size);
+
+  const tryStorageUpload = async (uploadBody, contentType, timeoutOverrideMs) => {
+    const uploadPromise = supabaseClient.storage.from(PHOTO_BUCKET).upload(path, uploadBody, {
+      upsert: true,
+      contentType
+    });
+    return withUploadTimeout(
+      uploadPromise,
+      timeoutOverrideMs,
+      "Upload trop long. Verifie la connexion et reessaie."
+    );
+  };
+
+  let lastErrorMessage = "Erreur inconnue";
+
+  try {
+    const restAttempt = await uploadBlobWithStorageRest(path, optimizedBody, optimizedType, optimizedTimeoutMs);
+    if (!restAttempt.error) {
+      return path;
+    }
+    lastErrorMessage = restAttempt.error.message || lastErrorMessage;
+  } catch (error) {
+    lastErrorMessage = error.message || lastErrorMessage;
+  }
+
+  try {
+    const secondAttempt = await tryStorageUpload(optimizedBody, optimizedType, optimizedTimeoutMs);
+    if (!secondAttempt.error) {
+      return path;
+    }
+    lastErrorMessage = secondAttempt.error.message || lastErrorMessage;
+  } catch (error) {
+    lastErrorMessage = error.message || lastErrorMessage;
+  }
+
+  const originalTimeoutMs = getUploadTimeoutMs(file.size);
+  try {
+    const thirdAttempt = await tryStorageUpload(file, sourceMimeType, originalTimeoutMs);
+    if (!thirdAttempt.error) {
+      return path;
+    }
+    lastErrorMessage = thirdAttempt.error.message || lastErrorMessage;
+  } catch (error) {
+    lastErrorMessage = error.message || lastErrorMessage;
+  }
+
+  setMessage(
+    updateMessage,
+    `Upload photo impossible: ${lastErrorMessage}.`,
+    "error"
+  );
+  return false;
 }
 
 async function deletePhoto(path) {
@@ -638,7 +881,8 @@ async function handleUpdateSubmit(event) {
   }
 
   const note = updateNoteInput.value.trim();
-  const hasPhoto = Boolean(getFirstSelectedFile([updatePhotoCameraInput, updatePhotoInput]));
+  const selectedPhoto = getSelectedUpdatePhoto();
+  const hasPhoto = Boolean(selectedPhoto.file);
   const resolved = resolveTrackingValues();
 
   if (resolved.error) {
@@ -660,7 +904,7 @@ async function handleUpdateSubmit(event) {
 
   try {
     setUpdateProgress(30, hasPhoto ? "Upload de la photo..." : "Validation des donnees...");
-    const uploadedPhotoPath = await uploadUpdatePhotoIfNeeded();
+    const uploadedPhotoPath = await uploadUpdatePhotoIfNeeded(selectedPhoto);
     if (uploadedPhotoPath === false) {
       return;
     }
@@ -760,18 +1004,8 @@ function attachEvents() {
   updateForm.addEventListener("submit", handleUpdateSubmit);
   updateModeInput.addEventListener("change", applyUpdateModeFields);
 
-  if (updatePhotoInput && updatePhotoCameraInput) {
+  if (updatePhotoInput) {
     updatePhotoInput.addEventListener("change", () => {
-      if (updatePhotoInput.files[0]) {
-        updatePhotoCameraInput.value = "";
-      }
-      updatePhotoSelectionText();
-    });
-
-    updatePhotoCameraInput.addEventListener("change", () => {
-      if (updatePhotoCameraInput.files[0]) {
-        updatePhotoInput.value = "";
-      }
       updatePhotoSelectionText();
     });
   }

@@ -15,6 +15,65 @@ function normalizeSearchText(value) {
     .trim();
 }
 
+function getPlantDisplayName(plant) {
+  return String(
+    plant?.general?.name ||
+    plant?.general?.plant_name ||
+    ""
+  );
+}
+
+function getGerminationHeatScore(plant) {
+  const minTemp = Number(plant?.germination?.ideal_temp_c?.min);
+  const maxTemp = Number(plant?.germination?.ideal_temp_c?.max);
+
+  if (Number.isFinite(minTemp) && Number.isFinite(maxTemp)) {
+    return (minTemp + maxTemp) / 2;
+  }
+  if (Number.isFinite(minTemp)) {
+    return minTemp;
+  }
+  if (Number.isFinite(maxTemp)) {
+    return maxTemp;
+  }
+  return null;
+}
+
+function sortPlants(plants, mode) {
+  const sorted = (plants || []).slice();
+  const compareByName = (a, b) =>
+    getPlantDisplayName(a).localeCompare(getPlantDisplayName(b), "fr", { sensitivity: "base" });
+
+  if (mode === "heat_asc" || mode === "heat_desc") {
+    const direction = mode === "heat_desc" ? -1 : 1;
+    sorted.sort((a, b) => {
+      const scoreA = getGerminationHeatScore(a);
+      const scoreB = getGerminationHeatScore(b);
+      const hasA = Number.isFinite(scoreA);
+      const hasB = Number.isFinite(scoreB);
+
+      if (!hasA && !hasB) {
+        return compareByName(a, b);
+      }
+      if (!hasA) {
+        return 1;
+      }
+      if (!hasB) {
+        return -1;
+      }
+
+      if (scoreA === scoreB) {
+        return compareByName(a, b);
+      }
+      return (scoreA - scoreB) * direction;
+    });
+    return sorted;
+  }
+
+  sorted.sort(compareByName);
+  return sorted;
+}
+
 fetch("seeds.json")
   .then(response => response.json())
   .then(data => {
@@ -45,15 +104,29 @@ function displayPlantList(plants) {
     searchWrap = document.createElement("div");
     searchWrap.id = "plant-search-wrap";
     searchWrap.className = "plant-search-wrap";
-    searchWrap.innerHTML = `
-      <label for="${searchInputId}" class="plant-search-label">Rechercher une plante</label>
-      <input id="${searchInputId}" class="plant-search-input" type="search" placeholder="Nom, type, nom latin...">
-      <p id="plant-search-status" class="plant-search-status"></p>
-    `;
     container.parentElement.insertBefore(searchWrap, container);
   }
 
+  searchWrap.innerHTML = `
+    <div class="plant-search-controls">
+      <div class="plant-search-field">
+        <label for="${searchInputId}" class="plant-search-label">Rechercher une plante</label>
+        <input id="${searchInputId}" class="plant-search-input" type="search" placeholder="Nom, type, nom latin...">
+      </div>
+      <div class="plant-sort-field">
+        <label for="plant-sort-select" class="plant-search-label">Trier les plantes</label>
+        <select id="plant-sort-select" class="plant-sort-select">
+          <option value="name_asc">Nom (A-Z)</option>
+          <option value="heat_asc">Chaleur germination (asc)</option>
+          <option value="heat_desc">Chaleur germination (desc)</option>
+        </select>
+      </div>
+    </div>
+    <p id="plant-search-status" class="plant-search-status"></p>
+  `;
+
   const searchInput = document.getElementById(searchInputId);
+  const sortSelect = document.getElementById("plant-sort-select");
   const searchStatus = document.getElementById("plant-search-status");
 
   const createPlantCard = (plant) => {
@@ -118,13 +191,14 @@ function displayPlantList(plants) {
           return fields.some((field) => normalizeSearchText(field).includes(normalizedQuery));
         })
       : plants;
+    const sortedPlants = sortPlants(filteredPlants, sortSelect?.value || "name_asc");
 
     container.innerHTML = "";
 
-    if (!filteredPlants.length) {
+    if (!sortedPlants.length) {
       container.innerHTML = "<p class=\"plant-search-empty\">Aucune plante ne correspond a la recherche.</p>";
     } else {
-      filteredPlants.forEach((plant) => {
+      sortedPlants.forEach((plant) => {
         container.appendChild(createPlantCard(plant));
       });
     }
@@ -140,7 +214,11 @@ function displayPlantList(plants) {
   };
 
   searchInput.value = "";
+  sortSelect.value = "name_asc";
   searchInput.oninput = () => {
+    renderList(searchInput.value);
+  };
+  sortSelect.onchange = () => {
     renderList(searchInput.value);
   };
 

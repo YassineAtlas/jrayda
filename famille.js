@@ -27,7 +27,6 @@ const seedDateInput = document.getElementById("seed-date");
 const currentWeekInput = document.getElementById("current-week");
 const seedLocationInput = document.getElementById("seed-location");
 const seedPhotoInput = document.getElementById("seed-photo");
-const seedPhotoCameraInput = document.getElementById("seed-photo-camera");
 const seedPhotoSelected = document.getElementById("seed-photo-selected");
 const seedProgress = document.getElementById("seed-progress");
 const seedProgressBar = document.getElementById("seed-progress-bar");
@@ -97,14 +96,19 @@ function getPrefillPlantIdFromUrl() {
   return String(id);
 }
 
-function getFirstSelectedFile(inputs) {
-  for (const input of inputs) {
-    const file = input?.files?.[0];
-    if (file) {
-      return file;
-    }
+function getSelectedSeedPhoto() {
+  const pickerFile = seedPhotoInput?.files?.[0];
+  if (pickerFile) {
+    return {
+      file: pickerFile,
+      isCameraCapture: false
+    };
   }
-  return null;
+
+  return {
+    file: null,
+    isCameraCapture: false
+  };
 }
 
 async function withUploadTimeout(promise, timeoutMs, timeoutMessage) {
@@ -124,6 +128,374 @@ async function withUploadTimeout(promise, timeoutMs, timeoutMessage) {
   }
 }
 
+function getUploadTimeoutMs(fileSizeBytes) {
+  const minTimeoutMs = 12 * 1000;
+  const maxTimeoutMs = 75 * 1000;
+  const assumedUploadSpeedBytesPerSecond = 256 * 1024;
+  const computedMs = Math.ceil((Number(fileSizeBytes || 0) / assumedUploadSpeedBytesPerSecond) * 1000) + 8 * 1000;
+  return Math.max(minTimeoutMs, Math.min(maxTimeoutMs, computedMs));
+}
+
+async function createStableUploadBlob(file, mimeType) {
+  const copiedBuffer = await file.arrayBuffer();
+  return new Blob([copiedBuffer], { type: mimeType });
+}
+
+async function downscaleImageBlob(blob, options = {}) {
+  const maxSide = Number(options.maxSide) || 1600;
+  const quality = Number(options.quality) || 0.72;
+
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(blob);
+    const image = new Image();
+
+    image.onload = () => {
+      try {
+        const srcWidth = image.naturalWidth || image.width;
+        const srcHeight = image.naturalHeight || image.height;
+        if (!srcWidth || !srcHeight) {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Dimensions image invalides."));
+          return;
+        }
+
+        const ratio = Math.min(1, maxSide / Math.max(srcWidth, srcHeight));
+        const targetWidth = Math.max(1, Math.round(srcWidth * ratio));
+        const targetHeight = Math.max(1, Math.round(srcHeight * ratio));
+
+        const canvas = document.createElement("canvas");
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error("Canvas indisponible."));
+          return;
+        }
+
+        context.drawImage(image, 0, 0, targetWidth, targetHeight);
+        canvas.toBlob(
+          (result) => {
+            URL.revokeObjectURL(objectUrl);
+            if (!result) {
+              reject(new Error("Conversion image impossible."));
+              return;
+            }
+            resolve(result);
+          },
+          "image/jpeg",
+          quality
+        );
+      } catch (error) {
+        URL.revokeObjectURL(objectUrl);
+        reject(error);
+      }
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Lecture image impossible."));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+async function buildOptimizedUploadBody(file, mimeType) {
+  const stableBlob = await createStableUploadBlob(file, mimeType);
+  if (!mimeType.startsWith("image/")) {
+    return {
+      uploadBody: stableBlob,
+      contentType: mimeType
+    };
+  }
+
+  try {
+    const optimizedBlob = await downscaleImageBlob(stableBlob, {
+      maxSide: 1600,
+      quality: 0.72
+    });
+    return {
+      uploadBody: optimizedBlob,
+      contentType: "image/jpeg"
+    };
+  } catch (_error) {
+    return {
+      uploadBody: stableBlob,
+      contentType: mimeType
+    };
+  }
+}
+
+async function uploadBlobWithStorageRest(path, uploadBody, mimeType, timeoutMs) {
+  if (!supabaseClient || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    return {
+      error: {
+        message: "Configuration Supabase manquante."
+      }
+    };
+  }
+
+  const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+  if (sessionError) {
+    return {
+      error: {
+        message: sessionError.message || "Session utilisateur invalide."
+      }
+    };
+  }
+
+  const accessToken = sessionData?.session?.access_token;
+  if (!accessToken) {
+    return {
+      error: {
+        message: "Session expiree. Reconnecte-toi."
+      }
+    };
+  }
+
+  const encodedPath = String(path || "")
+    .split("/")
+    .map((segment) => encodeURIComponent(segment))
+    .join("/");
+  const endpoint = `${window.SUPABASE_URL}/storage/v1/object/${PHOTO_BUCKET}/${encodedPath}`;
+
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", endpoint, true);
+    xhr.timeout = Math.max(30000, Number(timeoutMs) || 0);
+    xhr.setRequestHeader("apikey", window.SUPABASE_ANON_KEY);
+    xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+    xhr.setRequestHeader("x-upsert", "true");
+    if (mimeType) {
+      xhr.setRequestHeader("Content-Type", mimeType);
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve({ error: null });
+        return;
+      }
+
+      let message = `HTTP ${xhr.status}`;
+      try {
+        const parsed = JSON.parse(xhr.responseText || "{}");
+        message = parsed.message || parsed.error || parsed.msg || message;
+      } catch (_error) {
+        // Keep generic message when response is not JSON.
+      }
+      resolve({
+        error: {
+          message
+        }
+      });
+    };
+
+    xhr.onerror = () => {
+      resolve({
+        error: {
+          message: "Erreur reseau pendant upload REST."
+        }
+      });
+    };
+
+    xhr.ontimeout = () => {
+      resolve({
+        error: {
+          message: "Upload REST trop long. Verifie la connexion et reessaie."
+        }
+      });
+    };
+
+    xhr.send(uploadBody);
+  });
+}
+
+async function sendSemisRestRequest(method, query, payload, timeoutMs = 7000, preferHeader = "") {
+  if (!supabaseClient || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+    return {
+      error: {
+        message: "Configuration Supabase manquante."
+      }
+    };
+  }
+
+  const { data: sessionData, error: sessionError } = await supabaseClient.auth.getSession();
+  if (sessionError) {
+    return {
+      error: {
+        message: sessionError.message || "Session utilisateur invalide."
+      }
+    };
+  }
+
+  const accessToken = sessionData?.session?.access_token;
+  if (!accessToken) {
+    return {
+      error: {
+        message: "Session expiree. Reconnecte-toi."
+      }
+    };
+  }
+
+  const endpoint = `${window.SUPABASE_URL}/rest/v1/semis${query ? `?${query}` : ""}`;
+
+  return new Promise((resolve) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, endpoint, true);
+    xhr.timeout = Math.max(6000, Number(timeoutMs) || 0);
+    xhr.setRequestHeader("apikey", window.SUPABASE_ANON_KEY);
+    xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Accept", "application/json");
+    if (preferHeader) {
+      xhr.setRequestHeader("Prefer", preferHeader);
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        let parsedData = null;
+        try {
+          parsedData = xhr.responseText ? JSON.parse(xhr.responseText) : null;
+        } catch (_error) {
+          parsedData = null;
+        }
+        resolve({
+          error: null,
+          data: parsedData
+        });
+        return;
+      }
+
+      let message = `HTTP ${xhr.status}`;
+      try {
+        const parsed = JSON.parse(xhr.responseText || "{}");
+        message = parsed.message || parsed.error || parsed.msg || message;
+      } catch (_error) {
+        // Keep generic message when response is not JSON.
+      }
+
+      resolve({
+        error: {
+          message
+        }
+      });
+    };
+
+    xhr.onerror = () => {
+      resolve({
+        error: {
+          message: "Erreur reseau REST semis."
+        }
+      });
+    };
+
+    xhr.ontimeout = () => {
+      resolve({
+        error: {
+          message: "Requete semis trop longue."
+        }
+      });
+    };
+
+    xhr.send(payload ? JSON.stringify(payload) : null);
+  });
+}
+
+async function createSeedRecord(payload) {
+  const mutationTimeoutMs = 7000;
+  let lastErrorMessage = "";
+
+  try {
+    const sdkInsertPromise = supabaseClient
+      .from("semis")
+      .insert(payload)
+      .select("id")
+      .single();
+
+    const sdkResult = await withUploadTimeout(
+      sdkInsertPromise,
+      mutationTimeoutMs,
+      "Creation semis trop longue."
+    );
+
+    if (!sdkResult.error) {
+      return {
+        id: String(sdkResult.data?.id || "")
+      };
+    }
+    lastErrorMessage = sdkResult.error.message || "";
+  } catch (error) {
+    lastErrorMessage = error.message || "";
+  }
+
+  const restResult = await sendSemisRestRequest(
+    "POST",
+    "select=id",
+    payload,
+    mutationTimeoutMs,
+    "return=representation"
+  );
+
+  if (restResult.error) {
+    return {
+      error: {
+        message: restResult.error.message || lastErrorMessage || "Creation semis impossible."
+      }
+    };
+  }
+
+  const row = Array.isArray(restResult.data) ? restResult.data[0] : restResult.data;
+  return {
+    id: String(row?.id || "")
+  };
+}
+
+async function updateSeedRecord(seedId, payload) {
+  const mutationTimeoutMs = 7000;
+  let lastErrorMessage = "";
+
+  try {
+    const sdkUpdatePromise = supabaseClient
+      .from("semis")
+      .update(payload)
+      .eq("id", seedId)
+      .eq("user_id", currentUser.id);
+
+    const sdkResult = await withUploadTimeout(
+      sdkUpdatePromise,
+      mutationTimeoutMs,
+      "Mise a jour semis trop longue."
+    );
+
+    if (!sdkResult.error) {
+      return { ok: true };
+    }
+    lastErrorMessage = sdkResult.error.message || "";
+  } catch (error) {
+    lastErrorMessage = error.message || "";
+  }
+
+  const query = `id=eq.${encodeURIComponent(seedId)}&user_id=eq.${encodeURIComponent(currentUser.id)}`;
+  const restResult = await sendSemisRestRequest(
+    "PATCH",
+    query,
+    payload,
+    mutationTimeoutMs,
+    "return=minimal"
+  );
+
+  if (restResult.error) {
+    return {
+      error: {
+        message: restResult.error.message || lastErrorMessage || "Mise a jour semis impossible."
+      }
+    };
+  }
+
+  return { ok: true };
+}
+
 function clearSeedProgressHideTimer() {
   if (seedProgressHideTimer === null) {
     return;
@@ -141,16 +513,14 @@ function setSeedPhotoSelectedText(text, isSelected = false) {
 }
 
 function updateSeedPhotoSelectedText() {
-  const file = getFirstSelectedFile([seedPhotoCameraInput, seedPhotoInput]);
+  const file = seedPhotoInput?.files?.[0] || null;
   if (!file) {
     setSeedPhotoSelectedText("Aucune photo selectionnee.");
     return;
   }
 
-  const fromCamera = Boolean(seedPhotoCameraInput?.files?.[0]);
-  const sourceLabel = fromCamera ? "camera" : "fichier";
   const fileName = file.name || "image.jpg";
-  setSeedPhotoSelectedText(`Photo ${sourceLabel}: ${fileName}`, true);
+  setSeedPhotoSelectedText(`Photo fichier: ${fileName}`, true);
 }
 
 function setSeedFormSavingState(isSaving) {
@@ -161,7 +531,6 @@ function setSeedFormSavingState(isSaving) {
   currentWeekInput.disabled = isSaving;
   seedLocationInput.disabled = isSaving;
   seedPhotoInput.disabled = isSaving;
-  seedPhotoCameraInput.disabled = isSaving;
 }
 
 function setSeedProgress(value, label = "") {
@@ -280,12 +649,35 @@ function calculateCurrentWeek(sowingDate) {
   return Math.max(1, Math.floor(diffDays / 7) + 1);
 }
 
+function calculateDaysSinceDate(dateValue, referenceDate = getTodayIsoDate()) {
+  if (!dateValue) {
+    return null;
+  }
+  const start = new Date(`${dateValue}T00:00:00`);
+  const end = new Date(`${referenceDate}T00:00:00`);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return null;
+  }
+  const diffMs = end.getTime() - start.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
 function getSeedWeek(seed) {
   const dbWeek = Number(seed.current_week);
   if (Number.isInteger(dbWeek) && dbWeek > 0) {
     return dbWeek;
   }
   return calculateCurrentWeek(seed.sowing_date);
+}
+
+function formatSeedWeekLabel(seed) {
+  const week = getSeedWeek(seed);
+  const days = calculateDaysSinceDate(seed?.sowing_date);
+  if (!Number.isInteger(days)) {
+    return `Semaine ${week}`;
+  }
+  return `Semaine ${week} (${days}J)`;
 }
 
 function showAuthPanel() {
@@ -403,7 +795,7 @@ async function renderSeeds(seeds) {
         ? `<img class="seed-photo" src="${signedUrls[index]}" alt="Photo semis">`
         : "";
       const plantName = seed.plant_name || getPlantNameById(seed.plant_id) || "Plante inconnue";
-      const week = getSeedWeek(seed);
+      const weekLabel = formatSeedWeekLabel(seed);
 
       const ownerOrActions = canEdit
         ? `
@@ -417,7 +809,7 @@ async function renderSeeds(seeds) {
       return `
         <article class="seed-card">
           ${photo}
-          <div class="seed-week-badge">Semaine ${week}</div>
+          <div class="seed-week-badge">${escapeHtml(weekLabel)}</div>
           <h3>${escapeHtml(plantName)}</h3>
           <p><strong>Date semis:</strong> ${escapeHtml(formatDateForDisplay(seed.sowing_date))}</p>
           <p><strong>Emplacement:</strong> ${escapeHtml(seed.location)}</p>
@@ -503,51 +895,133 @@ async function applySession(session) {
   await loadSeeds();
 }
 
-async function uploadPhotoIfNeeded(fileInputs) {
-  const file = getFirstSelectedFile(fileInputs);
+async function uploadPhotoIfNeeded(selectedPhoto) {
+  const file = selectedPhoto?.file || null;
   if (!file) {
     return null;
   }
 
-  const isCameraCapture = Boolean(seedPhotoCameraInput?.files?.[0] && file === seedPhotoCameraInput.files[0]);
-  const mimeType = file.type || "image/jpeg";
-  const originalName = file.name || (isCameraCapture ? `camera-${Date.now()}.jpg` : "photo.jpg");
+  const sourceMimeType = selectedPhoto?.mimeType || file.type || "image/jpeg";
+  const originalName = selectedPhoto?.fileName || file.name || "photo.jpg";
   const safeName = originalName.toLowerCase().replace(/[^a-z0-9._-]/g, "-");
   const path = `${currentUser.id}/${Date.now()}-${safeName}`;
-  let uploadBody = file;
-
-  // Mobile camera captures can fail with direct File upload on some browsers.
-  if (isCameraCapture) {
-    try {
-      const copiedBuffer = await file.arrayBuffer();
-      uploadBody = new Blob([copiedBuffer], { type: mimeType });
-    } catch (error) {
-      setMessage(seedMessage, `Lecture photo impossible: ${error.message || "fichier invalide"}`, "error");
-      return false;
-    }
-  }
+  let optimizedUpload = null;
 
   try {
-    const uploadPromise = supabaseClient.storage.from(PHOTO_BUCKET).upload(path, uploadBody, {
-      upsert: false,
-      contentType: mimeType
-    });
-    const { error } = await withUploadTimeout(
-      uploadPromise,
-      60 * 1000,
-      "Upload trop long. Verifie la connexion et reessaie."
-    );
-
-    if (error) {
-      setMessage(seedMessage, `Upload photo impossible: ${error.message}`, "error");
-      return false;
-    }
+    optimizedUpload = await buildOptimizedUploadBody(file, sourceMimeType);
   } catch (error) {
-    setMessage(seedMessage, `Upload photo impossible: ${error.message}`, "error");
+    setMessage(seedMessage, `Lecture photo impossible: ${error.message || "fichier invalide"}`, "error");
     return false;
   }
 
-  return path;
+  const optimizedBody = optimizedUpload.uploadBody;
+  const optimizedType = optimizedUpload.contentType || sourceMimeType;
+  const optimizedTimeoutMs = getUploadTimeoutMs(optimizedBody.size || file.size);
+
+  const tryStorageUpload = async (uploadBody, contentType, timeoutOverrideMs) => {
+    const uploadPromise = supabaseClient.storage.from(PHOTO_BUCKET).upload(path, uploadBody, {
+      upsert: true,
+      contentType
+    });
+    return withUploadTimeout(
+      uploadPromise,
+      timeoutOverrideMs,
+      "Upload trop long. Verifie la connexion et reessaie."
+    );
+  };
+
+  let lastErrorMessage = "Erreur inconnue";
+
+  try {
+    const restAttempt = await uploadBlobWithStorageRest(path, optimizedBody, optimizedType, optimizedTimeoutMs);
+    if (!restAttempt.error) {
+      return path;
+    }
+    lastErrorMessage = restAttempt.error.message || lastErrorMessage;
+  } catch (error) {
+    lastErrorMessage = error.message || lastErrorMessage;
+  }
+
+  try {
+    const secondAttempt = await tryStorageUpload(optimizedBody, optimizedType, optimizedTimeoutMs);
+    if (!secondAttempt.error) {
+      return path;
+    }
+    lastErrorMessage = secondAttempt.error.message || lastErrorMessage;
+  } catch (error) {
+    lastErrorMessage = error.message || lastErrorMessage;
+  }
+
+  const originalTimeoutMs = getUploadTimeoutMs(file.size);
+  try {
+    const thirdAttempt = await tryStorageUpload(file, sourceMimeType, originalTimeoutMs);
+    if (!thirdAttempt.error) {
+      return path;
+    }
+    lastErrorMessage = thirdAttempt.error.message || lastErrorMessage;
+  } catch (error) {
+    lastErrorMessage = error.message || lastErrorMessage;
+  }
+
+  setMessage(
+    seedMessage,
+    `Upload photo impossible: ${lastErrorMessage}.`,
+    "error"
+  );
+  return false;
+}
+
+async function uploadSeedPhotoInBackground(
+  seedId,
+  selectedPhoto,
+  previousPhotoPath = null,
+  selectedPhotoSnapshotPromise = null
+) {
+  if (!seedId || !selectedPhoto?.file || !currentUser) {
+    return;
+  }
+
+  let photoForUpload = selectedPhoto;
+  if (selectedPhotoSnapshotPromise) {
+    const snapshot = await selectedPhotoSnapshotPromise;
+    if (snapshot?.blob) {
+      photoForUpload = {
+        file: snapshot.blob,
+        fileName: snapshot.name,
+        mimeType: snapshot.mimeType
+      };
+    }
+  }
+
+  setMessage(seedMessage, "Semis enregistre. Upload photo en cours...", "success");
+  const uploadedPhotoPath = await uploadPhotoIfNeeded(photoForUpload);
+  if (!uploadedPhotoPath || uploadedPhotoPath === false) {
+    setMessage(
+      seedMessage,
+      "Semis enregistre sans photo. Tu peux modifier ce semis et reessayer plus tard.",
+      "error"
+    );
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from("semis")
+    .update({ photo_path: uploadedPhotoPath })
+    .eq("id", seedId)
+    .eq("user_id", currentUser.id);
+
+  if (error) {
+    await deletePhotoIfExists(uploadedPhotoPath);
+    setMessage(seedMessage, `Photo envoyee mais liaison impossible: ${error.message}`, "error");
+    return;
+  }
+
+  if (previousPhotoPath && previousPhotoPath !== uploadedPhotoPath) {
+    await deletePhotoIfExists(previousPhotoPath);
+  }
+
+  await loadSeeds({ silentStatus: true });
+  setMessage(seedMessage, "Photo ajoutee au semis.", "success");
 }
 
 async function deletePhotoIfExists(path) {
@@ -677,6 +1151,8 @@ async function handleSeedSubmit(event) {
     return;
   }
 
+  const selectedPhoto = getSelectedSeedPhoto();
+
   isSavingSeed = true;
   setSeedFormSavingState(true);
   setMessage(seedMessage, "Enregistrement...");
@@ -685,17 +1161,23 @@ async function handleSeedSubmit(event) {
   let submitSucceeded = false;
 
   try {
-    let photoPath = existingSeed?.photo_path || null;
-    const hasNewPhoto = Boolean(getFirstSelectedFile([seedPhotoCameraInput, seedPhotoInput]));
-    setSeedProgress(28, hasNewPhoto ? "Upload de la photo..." : "Validation des donnees...");
-
-    const uploadedPhotoPath = await uploadPhotoIfNeeded([seedPhotoCameraInput, seedPhotoInput]);
-    if (uploadedPhotoPath === false) {
-      return;
-    }
-    if (uploadedPhotoPath) {
-      photoPath = uploadedPhotoPath;
-    }
+    const hasNewPhoto = Boolean(selectedPhoto.file);
+    const selectedPhotoSnapshotPromise = hasNewPhoto
+      ? createStableUploadBlob(
+        selectedPhoto.file,
+        selectedPhoto.file.type || "image/jpeg"
+      )
+        .then((snapshotBlob) => ({
+          blob: snapshotBlob,
+          name: selectedPhoto.file.name || "photo.jpg",
+          mimeType: selectedPhoto.file.type || "image/jpeg"
+        }))
+        .catch(() => null)
+      : null;
+    const previousPhotoPath = existingSeed?.photo_path || null;
+    const photoPath = previousPhotoPath;
+    let savedSeedId = seedId;
+    setSeedProgress(28, "Validation des donnees...");
 
     const payload = {
       plant_id: plantId,
@@ -709,31 +1191,24 @@ async function handleSeedSubmit(event) {
     setSeedProgress(62, isEdit ? "Mise a jour du semis..." : "Creation du semis...");
 
     if (isEdit) {
-      const { error } = await supabaseClient
-        .from("semis")
-        .update(payload)
-        .eq("id", seedId)
-        .eq("user_id", currentUser.id);
-
-      if (error) {
-        setMessage(seedMessage, `Erreur modification: ${error.message}`, "error");
+      const updateResult = await updateSeedRecord(seedId, payload);
+      if (updateResult.error) {
+        setMessage(seedMessage, `Erreur modification: ${updateResult.error.message}`, "error");
         return;
       }
-
-      if (uploadedPhotoPath && existingSeed.photo_path && existingSeed.photo_path !== uploadedPhotoPath) {
-        await deletePhotoIfExists(existingSeed.photo_path);
-      }
     } else {
-      const { error } = await supabaseClient.from("semis").insert({
+      const createResult = await createSeedRecord({
         ...payload,
         user_id: currentUser.id,
         owner_email: normalizeText(currentUser.email)
       });
 
-      if (error) {
-        setMessage(seedMessage, `Erreur creation: ${error.message}`, "error");
+      if (createResult.error) {
+        setMessage(seedMessage, `Erreur creation: ${createResult.error.message}`, "error");
         return;
       }
+
+      savedSeedId = String(createResult.id || "");
     }
 
     setSeedProgress(86, "Actualisation de la liste...");
@@ -744,7 +1219,17 @@ async function handleSeedSubmit(event) {
 
     resetSeedForm();
     setSeedProgress(100, "Semis enregistre.");
-    setMessage(seedMessage, isEdit ? "Semis modifie." : "Semis ajoute.", "success");
+    if (hasNewPhoto && savedSeedId) {
+      setMessage(seedMessage, isEdit ? "Semis modifie. Upload photo en cours..." : "Semis ajoute. Upload photo en cours...", "success");
+      void uploadSeedPhotoInBackground(
+        savedSeedId,
+        selectedPhoto,
+        previousPhotoPath,
+        selectedPhotoSnapshotPromise
+      );
+    } else {
+      setMessage(seedMessage, isEdit ? "Semis modifie." : "Semis ajoute.", "success");
+    }
     submitSucceeded = true;
   } finally {
     isSavingSeed = false;
@@ -868,18 +1353,8 @@ function attachEvents() {
     }
   });
 
-  if (seedPhotoInput && seedPhotoCameraInput) {
+  if (seedPhotoInput) {
     seedPhotoInput.addEventListener("change", () => {
-      if (seedPhotoInput.files[0]) {
-        seedPhotoCameraInput.value = "";
-      }
-      updateSeedPhotoSelectedText();
-    });
-
-    seedPhotoCameraInput.addEventListener("change", () => {
-      if (seedPhotoCameraInput.files[0]) {
-        seedPhotoInput.value = "";
-      }
       updateSeedPhotoSelectedText();
     });
   }

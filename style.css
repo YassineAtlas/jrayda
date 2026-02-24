@@ -238,6 +238,19 @@ p {
   padding: 0 30px;
 }
 
+.plant-search-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.plant-search-field,
+.plant-sort-field {
+  display: flex;
+  flex-direction: column;
+}
+
 .plant-search-label {
   display: block;
   margin-bottom: 6px;
@@ -251,6 +264,15 @@ p {
   border: 1px solid #cdd9ca;
   border-radius: 8px;
   font: inherit;
+}
+
+.plant-sort-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cdd9ca;
+  border-radius: 8px;
+  font: inherit;
+  background: #fff;
 }
 
 .plant-search-status {
@@ -277,6 +299,10 @@ p {
 
   .plant-search-wrap {
     padding: 0 20px;
+  }
+
+  .plant-search-controls {
+    grid-template-columns: 1fr;
   }
 }
 
