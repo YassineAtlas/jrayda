@@ -36,6 +36,26 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function normalizeDisplayName(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function getNameFromEmail(email) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  if (!normalizedEmail || !normalizedEmail.includes("@")) {
+    return normalizedEmail;
+  }
+  return normalizedEmail.split("@")[0];
+}
+
+function getOwnerLabel(ownerName, ownerEmail) {
+  const displayName = normalizeDisplayName(ownerName);
+  if (displayName) {
+    return displayName;
+  }
+  return getNameFromEmail(ownerEmail) || String(ownerEmail || "").trim() || "-";
+}
+
 function formatDate(value) {
   if (!value) {
     return "-";
@@ -191,7 +211,7 @@ function renderSemisCards(rows, signedUrls) {
           <h3>${escapeHtml(row.plant_name || "Plante")}</h3>
           <p><strong>Date semis:</strong> ${escapeHtml(formatDate(row.sowing_date))}</p>
           <p><strong>Emplacement:</strong> ${escapeHtml(row.location || "-")}</p>
-          <p><strong>Membre:</strong> ${escapeHtml(row.owner_email || "-")}</p>
+          <p><strong>Membre:</strong> ${escapeHtml(getOwnerLabel(row.owner_name, row.owner_email))}</p>
           <a class="seed-open-link seed-action-button" href="semis.html?id=${row.id}">Voir le suivi</a>
         </article>
       `;
@@ -249,7 +269,7 @@ async function loadSemisTab() {
 
   const { data: rows, error } = await supabaseClient
     .from("semis")
-    .select("id, plant_name, sowing_date, current_week, location, owner_email, photo_path")
+    .select("id, plant_name, sowing_date, current_week, location, owner_email, owner_name, photo_path")
     .eq("plant_id", plantId)
     .order("sowing_date", { ascending: false });
 

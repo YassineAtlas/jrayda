@@ -68,6 +68,26 @@ function normalizeText(value) {
     .trim();
 }
 
+function normalizeDisplayName(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function getNameFromEmail(email) {
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  if (!normalizedEmail || !normalizedEmail.includes("@")) {
+    return normalizedEmail;
+  }
+  return normalizedEmail.split("@")[0];
+}
+
+function getOwnerLabel(ownerName, ownerEmail) {
+  const displayName = normalizeDisplayName(ownerName);
+  if (displayName) {
+    return displayName;
+  }
+  return getNameFromEmail(ownerEmail) || String(ownerEmail || "").trim() || "-";
+}
+
 function getTodayIsoDate() {
   const now = new Date();
   const year = now.getFullYear();
@@ -583,7 +603,7 @@ async function renderSemisDetail() {
     <h3>${escapeHtml(semisRecord.plant_name || "Plante")}</h3>
     <p><strong>Date semis:</strong> ${escapeHtml(semisRecord.sowing_date || "-")}</p>
     <p><strong>Emplacement:</strong> ${escapeHtml(semisRecord.location || "-")}</p>
-    <p><strong>Createur:</strong> ${escapeHtml(semisRecord.owner_email || "-")}</p>
+    <p><strong>Createur:</strong> ${escapeHtml(getOwnerLabel(semisRecord.owner_name, semisRecord.owner_email))}</p>
     ${plantLink}
   `;
 }
@@ -689,7 +709,7 @@ async function loadSemisTimeline() {
 async function loadSemis() {
   const { data, error } = await supabaseClient
     .from("semis")
-    .select("id, user_id, owner_email, plant_id, plant_name, sowing_date, current_week, location, photo_path, created_at")
+    .select("id, user_id, owner_email, owner_name, plant_id, plant_name, sowing_date, current_week, location, photo_path, created_at")
     .eq("id", semisId)
     .maybeSingle();
 

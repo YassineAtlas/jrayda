@@ -17,14 +17,16 @@
 
 ## 2) Autoriser les emails de la famille
 
-Ajoute les adresses autorisees dans `family_emails`:
+Ajoute les adresses autorisees dans `family_emails` (avec un nom optionnel):
 
 ```sql
-insert into public.family_emails (email)
+insert into public.family_emails (email, display_name)
 values
-  ('prenom1@mail.com'),
-  ('prenom2@mail.com');
+  ('prenom1@mail.com', 'Maman'),
+  ('prenom2@mail.com', 'Papa');
 ```
+
+Tu peux aussi laisser `display_name` vide puis le definir plus tard depuis `famille.html`.
 
 ## 3) Relier le front au projet
 

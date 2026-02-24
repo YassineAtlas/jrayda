@@ -492,6 +492,33 @@ p {
   gap: 10px;
 }
 
+.display-name-row {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e1ebe0;
+}
+
+.display-name-row label {
+  font-weight: 600;
+  color: #2f3e2f;
+}
+
+.display-name-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.display-name-controls input {
+  flex: 1;
+}
+
+.display-name-controls button {
+  width: auto;
+  min-width: 180px;
+}
+
 .seed-form {
   margin-top: 20px;
   border-top: 1px solid #e1ebe0;
@@ -705,6 +732,16 @@ body.lightbox-open {
   .member-actions {
     width: 100%;
     flex-direction: column;
+  }
+
+  .display-name-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .display-name-controls button {
+    width: 100%;
+    min-width: 0;
   }
 
   .seed-list {

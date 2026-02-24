@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Espace famille</title>
-  <link rel="stylesheet" href="style.css?v=20260224-15">
+  <link rel="stylesheet" href="style.css?v=20260224-16">
 </head>
 <body>
   <header class="site-header">
@@ -47,6 +47,15 @@
           <button id="open-password-btn" type="button" class="secondary">Changer le mot de passe</button>
           <button id="logout-btn" type="button">Se deconnecter</button>
         </div>
+      </div>
+
+      <div class="display-name-row">
+        <label for="display-name-input">Nom affiche (pour "Cree par")</label>
+        <div class="display-name-controls">
+          <input type="text" id="display-name-input" maxlength="50" placeholder="Ex: Maman, Papa, Karim...">
+          <button id="save-display-name-btn" type="button" class="secondary">Enregistrer le nom</button>
+        </div>
+        <p id="display-name-message" class="status-message"></p>
       </div>
 
       <div id="seed-workspace">
@@ -107,6 +116,6 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=20260221-6"></script>
-  <script src="famille.js?v=20260224-26"></script>
+  <script src="famille.js?v=20260224-28"></script>
 </body>
 </html>

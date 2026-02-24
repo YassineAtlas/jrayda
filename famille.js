@@ -35,6 +35,9 @@ const seedProgressPercent = document.getElementById("seed-progress-percent");
 const saveBtn = document.getElementById("save-btn");
 const cancelEditBtn = document.getElementById("cancel-edit-btn");
 const seedList = document.getElementById("seed-list");
+const displayNameInput = document.getElementById("display-name-input");
+const saveDisplayNameBtn = document.getElementById("save-display-name-btn");
+const displayNameMessage = document.getElementById("display-name-message");
 
 let supabaseClient = null;
 let currentUser = null;
@@ -45,6 +48,7 @@ let isSavingSeed = false;
 let seedProgressHideTimer = null;
 let photoLightbox = null;
 let photoLightboxImage = null;
+let currentMemberDisplayName = "";
 
 function setMessage(element, text, type = "") {
   element.textContent = text || "";
@@ -65,6 +69,27 @@ function escapeHtml(value) {
 
 function normalizeText(value) {
   return String(value || "").trim().toLowerCase();
+}
+
+function normalizeDisplayName(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function getNameFromEmail(email) {
+  const normalizedEmail = normalizeText(email);
+  if (!normalizedEmail || !normalizedEmail.includes("@")) {
+    return normalizedEmail;
+  }
+  return normalizedEmail.split("@")[0];
+}
+
+function getOwnerLabel(ownerName, ownerEmail, fallback = "inconnu") {
+  const displayName = normalizeDisplayName(ownerName);
+  if (displayName) {
+    return displayName;
+  }
+  const fallbackFromEmail = getNameFromEmail(ownerEmail);
+  return fallbackFromEmail || normalizeText(ownerEmail) || fallback;
 }
 
 function formatDateForDisplay(dateValue) {
@@ -680,6 +705,118 @@ function formatSeedWeekLabel(seed) {
   return `Semaine ${week} (${days}J)`;
 }
 
+function getCurrentOwnerLabel() {
+  return getOwnerLabel(currentMemberDisplayName, currentUser?.email, "inconnu");
+}
+
+function resetDisplayNameEditor() {
+  currentMemberDisplayName = "";
+  if (displayNameInput) {
+    displayNameInput.value = "";
+    displayNameInput.disabled = false;
+  }
+  if (saveDisplayNameBtn) {
+    saveDisplayNameBtn.disabled = false;
+  }
+  if (displayNameMessage) {
+    setMessage(displayNameMessage, "");
+  }
+}
+
+async function loadDisplayNameForCurrentMember() {
+  if (!currentUser || !displayNameInput || !displayNameMessage) {
+    return;
+  }
+
+  const normalizedEmail = normalizeText(currentUser.email);
+  const { data, error } = await supabaseClient
+    .from("family_emails")
+    .select("display_name")
+    .eq("email", normalizedEmail)
+    .maybeSingle();
+
+  if (error) {
+    setMessage(displayNameMessage, `Erreur profil: ${error.message}`, "error");
+    return;
+  }
+
+  currentMemberDisplayName = normalizeDisplayName(data?.display_name) || getNameFromEmail(normalizedEmail);
+  displayNameInput.value = currentMemberDisplayName;
+  setMessage(displayNameMessage, "");
+}
+
+async function handleDisplayNameSave() {
+  if (!currentUser) {
+    setMessage(displayNameMessage, "Connexion requise.", "error");
+    return;
+  }
+
+  const rawValue = normalizeDisplayName(displayNameInput?.value || "");
+  const normalizedEmail = normalizeText(currentUser.email);
+  const nextDisplayName = rawValue || getNameFromEmail(normalizedEmail);
+
+  if (!nextDisplayName) {
+    setMessage(displayNameMessage, "Nom affiche invalide.", "error");
+    return;
+  }
+
+  if (nextDisplayName.length > 50) {
+    setMessage(displayNameMessage, "Nom affiche trop long (50 caracteres max).", "error");
+    return;
+  }
+
+  if (displayNameInput) {
+    displayNameInput.disabled = true;
+  }
+  if (saveDisplayNameBtn) {
+    saveDisplayNameBtn.disabled = true;
+  }
+
+  setMessage(displayNameMessage, "Enregistrement du nom...");
+
+  try {
+    const { error: profileError } = await supabaseClient
+      .from("family_emails")
+      .update({ display_name: nextDisplayName })
+      .eq("email", normalizedEmail);
+
+    if (profileError) {
+      setMessage(displayNameMessage, `Erreur profil: ${profileError.message}`, "error");
+      return;
+    }
+
+    const { error: semisError } = await supabaseClient
+      .from("semis")
+      .update({ owner_name: nextDisplayName })
+      .eq("owner_email", normalizedEmail)
+      .eq("user_id", currentUser.id);
+
+    currentMemberDisplayName = nextDisplayName;
+    if (displayNameInput) {
+      displayNameInput.value = nextDisplayName;
+    }
+
+    if (semisError) {
+      setMessage(
+        displayNameMessage,
+        `Nom enregistre, mais anciens semis non mis a jour: ${semisError.message}`,
+        "error"
+      );
+      return;
+    }
+
+    await loadSeeds({ silentStatus: true });
+    setMessage(displayNameMessage, "Nom affiche enregistre.", "success");
+  } finally {
+    if (displayNameInput) {
+      displayNameInput.disabled = false;
+    }
+    if (saveDisplayNameBtn) {
+      saveDisplayNameBtn.disabled = false;
+    }
+  }
+}
+
 function showAuthPanel() {
   authPanel.classList.remove("hidden");
   authPanel.hidden = false;
@@ -796,6 +933,7 @@ async function renderSeeds(seeds) {
         : "";
       const plantName = seed.plant_name || getPlantNameById(seed.plant_id) || "Plante inconnue";
       const weekLabel = formatSeedWeekLabel(seed);
+      const ownerLabel = getOwnerLabel(seed.owner_name, seed.owner_email);
 
       const ownerOrActions = canEdit
         ? `
@@ -804,7 +942,7 @@ async function renderSeeds(seeds) {
             <button type="button" data-action="delete" data-seed-id="${seed.id}">Supprimer</button>
           </div>
         `
-        : `<p><strong>Membre:</strong> ${escapeHtml(seed.owner_email || "inconnu")}</p>`;
+        : `<p><strong>Membre:</strong> ${escapeHtml(ownerLabel)}</p>`;
 
       return `
         <article class="seed-card">
@@ -829,7 +967,7 @@ async function loadSeeds(options = {}) {
 
   const { data, error } = await supabaseClient
     .from("semis")
-    .select("id, user_id, owner_email, plant_id, plant_name, sowing_date, current_week, location, photo_path, created_at")
+    .select("id, user_id, owner_email, owner_name, plant_id, plant_name, sowing_date, current_week, location, photo_path, created_at")
     .order("sowing_date", { ascending: false });
 
   if (error) {
@@ -872,6 +1010,7 @@ async function applySession(session) {
     showAuthPanel();
     resetSeedForm();
     resetPasswordForm();
+    resetDisplayNameEditor();
     seedList.innerHTML = "";
     return;
   }
@@ -880,6 +1019,7 @@ async function applySession(session) {
   if (!allowed) {
     await supabaseClient.auth.signOut();
     showAuthPanel();
+    resetDisplayNameEditor();
     setMessage(
       authMessage,
       "Cet email n'est pas autorise. Demande son ajout a la liste famille.",
@@ -891,6 +1031,7 @@ async function applySession(session) {
   showMemberPanel();
   showSeedWorkspace();
   resetPasswordForm();
+  await loadDisplayNameForCurrentMember();
   setMessage(seedMessage, `Connecte: ${currentUser.email}`, "success");
   await loadSeeds();
 }
@@ -1134,6 +1275,7 @@ async function handleSeedSubmit(event) {
   const location = seedLocationInput.value.trim();
   const todayIsoDate = getTodayIsoDate();
   const calculatedCurrentWeek = calculateCurrentWeek(sowingDate);
+  const ownerName = getCurrentOwnerLabel();
 
   if (!plantId || !plantName || !sowingDate || !location) {
     setMessage(seedMessage, "Complete tous les champs obligatoires.", "error");
@@ -1185,6 +1327,7 @@ async function handleSeedSubmit(event) {
       sowing_date: sowingDate,
       current_week: isEdit ? Number(existingSeed.current_week) || 1 : calculatedCurrentWeek,
       location,
+      owner_name: ownerName,
       photo_path: photoPath
     };
 
@@ -1344,6 +1487,23 @@ function attachEvents() {
     resetPasswordForm();
     showSeedWorkspace();
   });
+
+  if (saveDisplayNameBtn) {
+    saveDisplayNameBtn.addEventListener("click", () => {
+      void handleDisplayNameSave();
+    });
+  }
+
+  if (displayNameInput) {
+    displayNameInput.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") {
+        return;
+      }
+      event.preventDefault();
+      void handleDisplayNameSave();
+    });
+  }
+
   seedForm.addEventListener("submit", handleSeedSubmit);
   cancelEditBtn.addEventListener("click", resetSeedForm);
 

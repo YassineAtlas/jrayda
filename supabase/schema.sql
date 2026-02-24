@@ -2,6 +2,7 @@ create extension if not exists pgcrypto;
 
 create table if not exists public.family_emails (
   email text primary key check (email = lower(email)),
+  display_name text,
   added_at timestamptz not null default now()
 );
 
@@ -9,6 +10,7 @@ create table if not exists public.semis (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   owner_email text not null check (owner_email = lower(owner_email)),
+  owner_name text,
   plant_id integer,
   plant_name text,
   sowing_date date not null constraint semis_sowing_date_not_future check (sowing_date <= current_date),
@@ -22,9 +24,25 @@ create table if not exists public.semis (
 alter table public.semis add column if not exists plant_id integer;
 alter table public.semis add column if not exists plant_name text;
 alter table public.semis add column if not exists current_week integer;
+alter table public.family_emails add column if not exists display_name text;
+alter table public.semis add column if not exists owner_name text;
 update public.semis set current_week = 1 where current_week is null;
 update public.semis set sowing_date = current_date where sowing_date > current_date;
 alter table public.semis alter column current_week set default 1;
+update public.family_emails
+set display_name = split_part(email, '@', 1)
+where nullif(btrim(coalesce(display_name, '')), '') is null;
+update public.semis s
+set owner_name = coalesce(
+  nullif(btrim(fe.display_name), ''),
+  split_part(s.owner_email, '@', 1)
+)
+from public.family_emails fe
+where fe.email = s.owner_email
+  and nullif(btrim(coalesce(s.owner_name, '')), '') is null;
+update public.semis
+set owner_name = split_part(owner_email, '@', 1)
+where nullif(btrim(coalesce(owner_name, '')), '') is null;
 
 create table if not exists public.semis_updates (
   id uuid primary key default gen_random_uuid(),
@@ -112,6 +130,14 @@ on public.family_emails
 for select
 to authenticated
 using (email = lower(coalesce(auth.jwt() ->> 'email', '')));
+
+drop policy if exists family_emails_update_own on public.family_emails;
+create policy family_emails_update_own
+on public.family_emails
+for update
+to authenticated
+using (email = lower(coalesce(auth.jwt() ->> 'email', '')))
+with check (email = lower(coalesce(auth.jwt() ->> 'email', '')));
 
 drop policy if exists semis_select_family on public.semis;
 create policy semis_select_family
